@@ -1,0 +1,36 @@
+[gd_scene load_steps=6 format=3 uid="uid://b5jx1gmw1nomu"]
+
+[ext_resource type="Script" uid="uid://dpsoidpbmvc37" path="res://player.gd" id="1_4flbx"]
+[ext_resource type="Script" uid="uid://iba1w4wjcauu" path="res://player_draw.gd" id="2_onrkg"]
+[ext_resource type="Texture2D" uid="uid://bo2u5pkhxv2io" path="res://assets/bitmaps/soldier/soldier.png" id="3_i3pqv"]
+[ext_resource type="Script" uid="uid://bugujx5kj3r6o" path="res://camera_shake.gd" id="4_hqtel"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_i3pqv"]
+size = Vector2(76, 135)
+
+[node name="Player" type="CharacterBody2D"]
+scale = Vector2(1.2, 1.2)
+script = ExtResource("1_4flbx")
+
+[node name="Node2D" type="Node2D" parent="."]
+scale = Vector2(0.4, 0.4)
+script = ExtResource("2_onrkg")
+
+[node name="Sprite2D" type="Sprite2D" parent="Node2D"]
+texture = ExtResource("3_i3pqv")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 3.5)
+shape = SubResource("RectangleShape2D_i3pqv")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+limit_smoothed = true
+position_smoothing_enabled = true
+position_smoothing_speed = 2.0
+script = ExtResource("4_hqtel")
+
+[node name="WalkDust" type="GPUParticles2D" parent="."]
+position = Vector2(0, 70)
+
+[node name="LandDust" type="GPUParticles2D" parent="."]
+position = Vector2(0, 70)

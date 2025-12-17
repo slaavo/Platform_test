@@ -1,0 +1,185 @@
+extends CharacterBody2D
+
+# === REFERENCJE DO WĘZŁÓW ===
+@onready var sprite = $Node2D/Sprite2D
+@onready var camera = $Camera2D
+@onready var walk_dust = $WalkDust      # Kurz przy chodzeniu
+@onready var land_dust = $LandDust      # Kurz przy lądowaniu
+
+
+# === PARAMETRY GRACZA ===
+@export var speed := 600.0
+@export var jump_force := 2200.0
+@export var gravity := 7000.0
+
+# === PARAMETRY SCREEN SHAKE ===
+@export var landing_shake_threshold := 2900.0
+@export var shake_strength := 15.0
+@export var shake_duration := 0.3
+
+
+# === ZMIENNE WEWNĘTRZNE ===
+var was_in_air := false
+var previous_velocity_y := 0.0
+
+
+func _ready():
+	add_to_group("player")
+	
+	# === KONFIGURACJA KURZU ===
+	setup_walk_dust()
+	setup_land_dust()
+
+
+# === TWORZY OKRĄGŁĄ TEKSTURĘ DLA CZĄSTECZEK ===
+func create_dust_texture() -> Texture2D:
+	var size = 16
+	var image = Image.create(size, size, false, Image.FORMAT_RGBA8)
+	var center = Vector2(size / 2.0, size / 2.0)
+	var radius = size / 2.0
+	
+	# Rysuj kółko piksel po pikselu
+	for x in range(size):
+		for y in range(size):
+			var distance = Vector2(x + 0.5, y + 0.5).distance_to(center)
+			if distance <= radius:
+				# Miękkie krawędzie - im bliżej krawędzi, tym bardziej przezroczyste
+				var alpha = 1.0 - (distance / radius)
+				image.set_pixel(x, y, Color(1, 1, 1, alpha))
+			else:
+				image.set_pixel(x, y, Color(0, 0, 0, 0))
+	
+	return ImageTexture.create_from_image(image)
+
+
+# === KONFIGURACJA EFEKTU KURZU PRZY CHODZENIU ===
+func setup_walk_dust():
+	if not walk_dust:
+		return
+	
+	# === MATERIAŁ CZĄSTECZEK ===
+	var material = ParticleProcessMaterial.new()
+	
+	# Kierunek emisji - w górę i na boki
+	material.direction = Vector3(0, -1, 0)
+	material.spread = 60.0
+	
+	# Prędkość cząsteczek
+	material.initial_velocity_min = 30.0
+	material.initial_velocity_max = 60.0
+	
+	# Grawitacja - lekkie opadanie
+	material.gravity = Vector3(0, 40, 0)
+	
+	# Skala cząsteczek
+	material.scale_min = 0.7
+	material.scale_max = 1.2
+	
+	# Kolor - brązowy kurz
+	material.color = Color(0.55, 0.45, 0.35, 0.8)
+	
+	# === USTAWIENIA WĘZŁA ===
+	walk_dust.process_material = material
+	walk_dust.texture = create_dust_texture()    # WAŻNE: tekstura!
+	walk_dust.amount = 20
+	walk_dust.lifetime = 0.9
+	walk_dust.emitting = false
+	walk_dust.one_shot = false
+	
+	# Widoczność
+	walk_dust.visibility_rect = Rect2(-50, -50, 100, 100)
+
+
+# === KONFIGURACJA EFEKTU KURZU PRZY LĄDOWANIU ===
+func setup_land_dust():
+	if not land_dust:
+		return
+	
+	var material = ParticleProcessMaterial.new()
+	
+	# Kierunek - eksplozja na boki i w górę
+	material.direction = Vector3(0, -1, 0)
+	material.spread = 85.0
+	
+	# Prędkość - szybsze
+	material.initial_velocity_min = 80.0
+	material.initial_velocity_max = 150.0
+	
+	# Grawitacja
+	material.gravity = Vector3(0, 80, 0)
+	
+	# Większe cząsteczki
+	material.scale_min = 2.0
+	material.scale_max = 3.0
+	
+	# Kolor
+	material.color = Color(0.55, 0.45, 0.35, 0.9)
+	
+	# === USTAWIENIA WĘZŁA ===
+	land_dust.process_material = material
+	land_dust.texture = create_dust_texture()    # WAŻNE: tekstura!
+	land_dust.amount = 20
+	land_dust.lifetime = 0.2
+	land_dust.emitting = false
+	land_dust.one_shot = true
+	
+	# Widoczność
+	land_dust.visibility_rect = Rect2(-100, -100, 200, 200)
+
+
+func _physics_process(delta):
+	# === GRAWITACJA ===
+	if not is_on_floor():
+		velocity.y += gravity * delta
+		velocity.y = min(velocity.y, 4000)
+	
+	# === RUCH W LEWO/PRAWO ===
+	var direction := Input.get_action_strength("ui_right") - Input.get_action_strength("ui_left")
+	velocity.x = direction * speed
+	
+	# === SKOK ===
+	if Input.is_action_just_pressed("ui_accept") and is_on_floor():
+		velocity.y = -jump_force
+	
+	# === OBRACANIE SPRITE'A ===
+	if velocity.x != 0:
+		sprite.flip_h = velocity.x < 0
+	
+	# === KURZ PRZY CHODZENIU ===
+	if walk_dust:
+		var is_walking = is_on_floor() and abs(velocity.x) > 50
+		if is_walking and not walk_dust.emitting:
+			walk_dust.emitting = true
+		elif not is_walking and walk_dust.emitting:
+			walk_dust.emitting = false
+	
+	# === ZAPAMIĘTAJ PRĘDKOŚĆ PRZED RUCHEM ===
+	previous_velocity_y = velocity.y
+	
+	# === ZASTOSUJ RUCH ===
+	move_and_slide()
+	
+	# === DETEKCJA LĄDOWANIA ===
+	if was_in_air and is_on_floor():
+		# Kurz przy lądowaniu
+		if previous_velocity_y > 500:
+			emit_land_dust()
+		
+		# Screen shake przy mocnym lądowaniu
+		if previous_velocity_y > landing_shake_threshold:
+			trigger_camera_shake()
+	
+	was_in_air = not is_on_floor()
+
+
+# === EMITUJ KURZ PRZY LĄDOWANIU ===
+func emit_land_dust():
+	if land_dust:
+		land_dust.restart()
+		land_dust.emitting = true
+
+
+# === TRZĘSIENIE KAMERY ===
+func trigger_camera_shake():
+	if camera:
+		camera.shake(shake_strength, shake_duration)
