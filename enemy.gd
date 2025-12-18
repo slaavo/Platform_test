@@ -30,6 +30,9 @@ var is_ready: bool = false
 
 
 func _ready():
+	# Dodaj do grupy "enemy" dla detekcji kolizji
+	add_to_group("enemy")
+
 	# Ustaw kierunek startowy
 	direction = 1 if start_moving_right else -1
 	
