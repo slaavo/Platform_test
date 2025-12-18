@@ -35,7 +35,7 @@ var enemy_shake_cooldown: float = 0.0
 func _ready() -> void:
 	add_to_group("player")
 	_setup_dust_effects()
-	sprite_anim.play("run")
+	sprite_anim.play("walk")
 	sprite_anim.pause()
 
 
@@ -93,7 +93,7 @@ func _update_animation() -> void:
 	var is_running: bool = is_on_floor() and abs(velocity.x) > MIN_WALK_VELOCITY
 	if is_running:
 		if not sprite_anim.is_playing():
-			sprite_anim.play("run")
+			sprite_anim.play("walk")
 	else:
 		if sprite_anim.is_playing():
 			sprite_anim.pause()
