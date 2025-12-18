@@ -6,6 +6,9 @@ const TERMINAL_VELOCITY: float = 4000.0
 const MIN_WALK_VELOCITY: float = 50.0
 const MIN_LAND_DUST_VELOCITY: float = 500.0
 
+@onready var sprite_anim: AnimatedSprite2D = $Node2D/AnimatedSprite2D
+
+
 # === REFERENCJE DO WĘZŁÓW ===
 @onready var sprite: Sprite2D = $Node2D/Sprite2D
 @onready var camera: Camera2D = $Camera2D
@@ -32,6 +35,7 @@ var enemy_shake_cooldown: float = 0.0
 func _ready() -> void:
 	add_to_group("player")
 	_setup_dust_effects()
+	sprite_anim.play("run")
 
 
 func _setup_dust_effects() -> void:
@@ -80,6 +84,7 @@ func _handle_jump() -> void:
 func _update_sprite_direction() -> void:
 	if sprite and velocity.x != 0:
 		sprite.flip_h = velocity.x < 0
+		sprite_anim.flip_h = velocity.x < 0
 
 
 func _update_walk_dust() -> void:

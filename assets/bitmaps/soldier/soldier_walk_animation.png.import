@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cxt4g4nbxe5ow"
-path="res://.godot/imported/soldier_frames.png-300e62c690d8947c87c631b3c9556629.ctex"
+uid="uid://bfs7xwbxtx2vy"
+path="res://.godot/imported/soldier_walk_animation.png-b46a64aba2eb820a17fc5de7028badff.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/bitmaps/soldier/soldier_frames.png"
-dest_files=["res://.godot/imported/soldier_frames.png-300e62c690d8947c87c631b3c9556629.ctex"]
+source_file="res://assets/bitmaps/soldier/soldier_walk_animation.png"
+dest_files=["res://.godot/imported/soldier_walk_animation.png-b46a64aba2eb820a17fc5de7028badff.ctex"]
 
 [params]
 
