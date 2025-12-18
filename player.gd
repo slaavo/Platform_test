@@ -21,6 +21,7 @@ extends CharacterBody2D
 # === ZMIENNE WEWNĘTRZNE ===
 var was_in_air := false
 var previous_velocity_y := 0.0
+var enemy_shake_cooldown := 0.0  # Cooldown między shake'ami przy kolizji z wrogiem
 
 
 func _ready():
@@ -158,7 +159,10 @@ func _physics_process(delta):
 	
 	# === ZASTOSUJ RUCH ===
 	move_and_slide()
-	
+
+	# === DETEKCJA KOLIZJI Z WROGIEM ===
+	_check_enemy_collision(delta)
+
 	# === DETEKCJA LĄDOWANIA ===
 	if was_in_air and is_on_floor():
 		# Kurz przy lądowaniu
@@ -183,3 +187,23 @@ func emit_land_dust():
 func trigger_camera_shake():
 	if camera:
 		camera.shake(shake_strength, shake_duration)
+
+
+# === DETEKCJA KOLIZJI Z WROGIEM ===
+func _check_enemy_collision(delta: float):
+	# Aktualizuj cooldown
+	if enemy_shake_cooldown > 0:
+		enemy_shake_cooldown -= delta
+
+	# Sprawdź wszystkie kolizje z move_and_slide()
+	for i in range(get_slide_collision_count()):
+		var collision = get_slide_collision(i)
+		var collider = collision.get_collider()
+
+		# Sprawdź czy obiekt jest wrogiem
+		if collider and collider.is_in_group("enemy"):
+			# Wywołaj shake tylko jeśli cooldown minął
+			if enemy_shake_cooldown <= 0:
+				trigger_camera_shake()
+				enemy_shake_cooldown = 0.5  # Pół sekundy cooldownu
+			break

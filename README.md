@@ -4,7 +4,7 @@ Prosta gra platformowa 2D tworzona w silniku Godot 4.5.
 
 ## O projekcie
 
-Gra platformowa, w kt¨®rej gracz steruje postaci? skacz?c? po platformach, zbiera monety i unika przeszk¨®d. Projekt uczniowski realizowany w ramach nauki programowania i tworzenia gier.
+Gra platformowa, w ktï¿½ï¿½rej gracz steruje postaci? skacz?c? po platformach, zbiera monety i unika przeszkï¿½ï¿½d. Projekt uczniowski realizowany w ramach nauki programowania i tworzenia gier.
 
 ## Zaimplementowane funkcje
 
@@ -16,7 +16,7 @@ Gra platformowa, w kt¨®rej gracz steruje postaci? skacz?c? po platformach, zbier
 
 ### Platformy
 - Konfigurowalne wymiary (szeroko?? i wysoko?? w kafelkach)
-- Automatyczne generowanie odpowiednich kafelk¨®w (rogi, kraw?dzie, ?rodek)
+- Automatyczne generowanie odpowiednich kafelkï¿½ï¿½w (rogi, kraw?dzie, ?rodek)
 - Podgl?d w edytorze dzi?ki trybowi @tool
 
 ### Monety
@@ -24,7 +24,7 @@ Gra platformowa, w kt¨®rej gracz steruje postaci? skacz?c? po platformach, zbier
 - Zbieranie przez gracza
 - Efekt zbierania: moneta unosi si?, powi?ksza i znika (fade out)
 - Konfigurowalne parametry animacji (pr?dko??, czas, powi?kszenie)
-- System sygna?¨®w do komunikacji z g?¨®wn? scen?
+- System sygna?ï¿½ï¿½w do komunikacji z g?ï¿½ï¿½wn? scen?
 
 ### Przeciwnicy
 - Robot patroluj?cy platform?
@@ -35,6 +35,7 @@ Gra platformowa, w kt¨®rej gracz steruje postaci? skacz?c? po platformach, zbier
 - Kamera ?ledz?ca gracza z p?ynnym przesuwaniem
 - Automatyczne limity kamery na podstawie rozmiaru planszy
 - Efekt screen shake przy mocnym l?dowaniu
+- Efekt screen shake przy kolizji z przeciwnikiem
 - Wy?wietlanie wyniku (Score)
 
 ## Plan rozwoju
@@ -42,22 +43,22 @@ Gra platformowa, w kt¨®rej gracz steruje postaci? skacz?c? po platformach, zbier
 | Miesi?c | Zadania |
 |---------|---------|
 | ~~Pa?dziernik~~ | ? Posta? - chodzenie i skakanie |
-| ~~Listopad~~ | ? Monety do zbierania i licznik punkt¨®w |
-| ~~Grudzie¨½~~ | ? Przeszkody i prosty przeciwnik |
-| Stycze¨½ | Menu i kilka kr¨®tkich poziom¨®w |
+| ~~Listopad~~ | ? Monety do zbierania i licznik punktï¿½ï¿½w |
+| ~~Grudzieï¿½ï¿½~~ | ? Przeszkody i prosty przeciwnik |
+| Styczeï¿½ï¿½ | Menu i kilka krï¿½ï¿½tkich poziomï¿½ï¿½w |
 | Luty | Animacje i d?wi?ki, poprawa sterowania |
 | Marzec | Zapis post?pu (?eby gra pami?ta?a wynik) |
-| Kwiecie¨½ | Testowanie, poprawki, pokaz wersji 3D |
+| Kwiecieï¿½ï¿½ | Testowanie, poprawki, pokaz wersji 3D |
 | Maj | Gotowa gra i prezentacja projektu |
 
 ## Planowane funkcje
 
 - [ ] Menu startowe
-- [ ] Minimum 3 kr¨®tkie poziomy
+- [ ] Minimum 3 krï¿½ï¿½tkie poziomy
 - [ ] Meta (koniec poziomu)
 - [ ] D?wi?ki i animacje postaci
-- [ ] Zapis wynik¨®w
-- [ ] Ekran ko¨½cowy
+- [ ] Zapis wynikï¿½ï¿½w
+- [ ] Ekran koï¿½ï¿½cowy
 - [ ] (Bonus) Wersja 3D
 
 ## Technologie
@@ -69,30 +70,30 @@ Gra platformowa, w kt¨®rej gracz steruje postaci? skacz?c? po platformach, zbier
 ## Struktura projektu
 
 ```
-©À©¤©¤ main.gd          # G?¨®wna logika gry, zarz?dzanie wynikiem
-©À©¤©¤ Main.tscn        # G?¨®wna scena z poziomem
-©À©¤©¤ player.gd        # Sterowanie gracza i fizyka
-©À©¤©¤ player.tscn      # Scena gracza
-©À©¤©¤ platform.gd      # Logika generowania platform
-©À©¤©¤ platform.tscn    # Scena platformy
-©À©¤©¤ coin.gd          # Logika monet
-©À©¤©¤ coin.tscn        # Scena monety
-©À©¤©¤ enemy.gd         # AI przeciwnika
-©À©¤©¤ enemy.tscn       # Scena przeciwnika
-©À©¤©¤ camera_shake.gd  # Efekt trz?sienia kamery
-©¸©¤©¤ player_draw.gd   # (nieu?ywany) Rysowanie proceduralne
+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ main.gd          # G?ï¿½ï¿½wna logika gry, zarz?dzanie wynikiem
+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Main.tscn        # G?ï¿½ï¿½wna scena z poziomem
+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ player.gd        # Sterowanie gracza i fizyka
+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ player.tscn      # Scena gracza
+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ platform.gd      # Logika generowania platform
+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ platform.tscn    # Scena platformy
+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ coin.gd          # Logika monet
+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ coin.tscn        # Scena monety
+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ enemy.gd         # AI przeciwnika
+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ enemy.tscn       # Scena przeciwnika
+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ camera_shake.gd  # Efekt trz?sienia kamery
+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ player_draw.gd   # (nieu?ywany) Rysowanie proceduralne
 ```
 
 ## Uruchomienie
 
-1. Otw¨®rz projekt w Godot 4.5
+1. Otwï¿½ï¿½rz projekt w Godot 4.5
 2. Uruchom scen? `Main.tscn` (F5)
 
 ## Sterowanie
 
 | Klawisz | Akcja |
 |---------|-------|
-| ¡û ¡ú lub A D | Ruch w lewo/prawo |
+| ï¿½ï¿½ ï¿½ï¿½ lub A D | Ruch w lewo/prawo |
 | Spacja | Skok |
 
 ---
