@@ -95,37 +95,54 @@ func setup_walk_dust():
 func setup_land_dust():
 	if not land_dust:
 		return
-	
+
 	var material = ParticleProcessMaterial.new()
-	
-	# Kierunek - eksplozja na boki i w górę
-	material.direction = Vector3(0, -1, 0)
-	material.spread = 85.0
-	
-	# Prędkość - szybsze
-	material.initial_velocity_min = 80.0
-	material.initial_velocity_max = 150.0
-	
-	# Grawitacja
-	material.gravity = Vector3(0, 80, 0)
-	
-	# Większe cząsteczki
-	material.scale_min = 2.0
-	material.scale_max = 3.0
-	
-	# Kolor
-	material.color = Color(0.55, 0.45, 0.35, 0.9)
-	
+
+	# Kierunek - na boki (lewo i prawo)
+	material.direction = Vector3(1, 0, 0)
+	material.spread = 180.0  # Pełne 180 stopni = obie strony
+
+	# Prędkość wyrzutu
+	material.initial_velocity_min = 100.0
+	material.initial_velocity_max = 200.0
+
+	# Grawitacja - cząsteczki opadają
+	material.gravity = Vector3(0, 400, 0)
+
+	# Tłumienie - cząsteczki zwalniają
+	material.damping_min = 50.0
+	material.damping_max = 80.0
+
+	# Rozmiar cząsteczek
+	material.scale_min = 1.5
+	material.scale_max = 2.5
+
+	# Zmniejszanie rozmiaru w czasie (zanikanie)
+	var scale_curve = Curve.new()
+	scale_curve.add_point(Vector2(0.0, 1.0))   # Początek: pełny rozmiar
+	scale_curve.add_point(Vector2(0.7, 0.6))   # 70% czasu: 60% rozmiaru
+	scale_curve.add_point(Vector2(1.0, 0.0))   # Koniec: znika
+	material.scale_curve = scale_curve
+
+	# Gradient koloru - fade out (zanikanie przezroczystości)
+	var gradient = Gradient.new()
+	gradient.set_color(0, Color(0.55, 0.45, 0.35, 0.9))  # Początek: widoczny
+	gradient.set_color(1, Color(0.55, 0.45, 0.35, 0.0))  # Koniec: przezroczysty
+	var gradient_texture = GradientTexture1D.new()
+	gradient_texture.gradient = gradient
+	material.color_ramp = gradient_texture
+
 	# === USTAWIENIA WĘZŁA ===
 	land_dust.process_material = material
-	land_dust.texture = create_dust_texture()    # WAŻNE: tekstura!
-	land_dust.amount = 20
-	land_dust.lifetime = 0.2
+	land_dust.texture = create_dust_texture()
+	land_dust.amount = 16
+	land_dust.lifetime = 0.6  # Dłuższy czas życia dla widocznego opadania
 	land_dust.emitting = false
-	land_dust.one_shot = true
-	
+	land_dust.one_shot = true  # Jednorazowy wyrzut
+	land_dust.explosiveness = 1.0  # Wszystkie cząsteczki na raz
+
 	# Widoczność
-	land_dust.visibility_rect = Rect2(-100, -100, 200, 200)
+	land_dust.visibility_rect = Rect2(-200, -100, 400, 200)
 
 
 func _physics_process(delta):
