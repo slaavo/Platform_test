@@ -524,7 +524,7 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_i3pqv"]
-size = Vector2(120, 136.66666)
+size = Vector2(95.833336, 136.66666)
 
 [node name="Player" type="CharacterBody2D"]
 scale = Vector2(1.2, 1.2)
@@ -543,7 +543,7 @@ sprite_frames = SubResource("SpriteFrames_b26j0")
 animation = &"walk"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(-2.499999, 3.7749608e-06)
+position = Vector2(-0.41666615, 3.7749608e-06)
 shape = SubResource("RectangleShape2D_i3pqv")
 
 [node name="Camera2D" type="Camera2D" parent="."]

@@ -14,6 +14,8 @@ const MIN_WALK_VELOCITY: float = 10.0
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var walk_dust: GPUParticles2D = $WalkDust
 
+@onready var sprite_anim: AnimatedSprite2D = $AnimatedSprite2D
+
 # === ZMIENNE WEWNĘTRZNE ===
 var direction: int = 1
 var left_bound: float = 0.0
@@ -25,6 +27,7 @@ func _ready() -> void:
 	add_to_group("enemy")
 	direction = 1 if start_moving_right else -1
 	_setup_dust_effects()
+	sprite_anim.play("run")	
 
 	# Poczekaj jedną klatkę, aż platforma się zainicjalizuje
 	await get_tree().process_frame
@@ -123,3 +126,5 @@ func _check_bounds() -> void:
 func _flip_sprite() -> void:
 	if sprite:
 		sprite.flip_h = (direction == -1)
+	if sprite_anim:
+		sprite_anim.flip_h = (direction == -1)
