@@ -103,7 +103,9 @@ static func setup_land_dust(dust_node: GPUParticles2D, dust_color: Color = COLOR
 	scale_curve.add_point(Vector2(0.0, 1.0))
 	scale_curve.add_point(Vector2(0.7, 0.6))
 	scale_curve.add_point(Vector2(1.0, 0.0))
-	material.scale_curve = scale_curve
+	var scale_curve_texture: CurveTexture = CurveTexture.new()
+	scale_curve_texture.curve = scale_curve
+	material.scale_curve = scale_curve_texture
 
 	# Gradient koloru - fade out
 	var base_color: Color = dust_color
