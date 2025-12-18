@@ -1,151 +1,137 @@
+class_name Main
 extends Node2D
 
-# === ZMIENNE GLOBALNE ===
-# Przechowuje aktualny wynik gracza
-var score = 0
+# === STAŁE ===
+const CAMERA_MARGIN: int = 5
+const DEATH_ZONE_MARGIN: float = 500.0  # Ile pikseli poniżej planszy jest strefa śmierci
 
 # === REFERENCJE DO WĘZŁÓW ===
-# Referencja do etykiety wyświetlającej wynik (znajduje się w CanvasLayer)
-@onready var score_label = $CanvasLayer/Label
-
-# Referencja do gracza
-@onready var player = $Player
-
-# Referencja do kamery, która jest dzieckiem gracza
-@onready var camera = $Player/Camera2D
+@onready var score_label: Label = $CanvasLayer/Label
+@onready var player: CharacterBody2D = $Player
+@onready var camera: Camera2D = $Player/Camera2D
 
 
-# === FUNKCJA STARTOWA ===
-# Wywoływana automatycznie gdy scena jest gotowa
-func _ready():
-	update_score_display()      # Ustaw początkowy wyświetlacz wyniku
-	connect_coins()             # Podłącz sygnały od wszystkich monet
-	setup_camera_limits()       # Ustaw limity kamery na podstawie rozmiaru planszy
+func _ready() -> void:
+	_connect_game_manager()
+	_connect_coins()
+	_setup_camera_limits()
+	_save_player_spawn()
+	_update_score_display()
+
+
+func _physics_process(_delta: float) -> void:
+	_check_death_zone()
+
+
+# === PODŁĄCZENIE DO GAME MANAGER ===
+func _connect_game_manager() -> void:
+	if GameState:
+		GameState.score_changed.connect(_on_score_changed)
+
+
+func _on_score_changed(new_score: int) -> void:
+	if score_label:
+		score_label.text = "Score: " + str(new_score)
+
+
+# === ZAPIS POZYCJI STARTOWEJ GRACZA ===
+func _save_player_spawn() -> void:
+	if player and GameState:
+		GameState.set_spawn_position(player.global_position)
+
+
+# === DETEKCJA STREFY ŚMIERCI ===
+func _check_death_zone() -> void:
+	if not player or not camera:
+		return
+
+	# Sprawdź czy gracz spadł poniżej dolnej granicy kamery
+	var death_y: float = camera.limit_bottom + DEATH_ZONE_MARGIN
+	if player.global_position.y > death_y:
+		_respawn_player()
+
+
+func _respawn_player() -> void:
+	if not player or not GameState:
+		return
+
+	player.global_position = GameState.get_spawn_position()
+	player.velocity = Vector2.ZERO
+	GameState.on_player_respawn()
 
 
 # === KONFIGURACJA LIMITÓW KAMERY ===
-# Automatycznie oblicza granice planszy i ustawia limity kamery
-func setup_camera_limits():
-	# Tablica do przechowywania wszystkich TileMapLayer ze sceny
-	var all_tilemaps = []
-	
-	# Pobierz węzeł zawierający wszystkie platformy
-	var platforms_node = $Platforms
-	
-	# Przejdź przez wszystkie dzieci węzła Platforms (każda platforma to osobny węzeł)
+func _setup_camera_limits() -> void:
+	var all_tilemaps: Array[TileMapLayer] = []
+
+	var platforms_node: Node = get_node_or_null("Platforms")
+	if not platforms_node:
+		push_error("Main: Nie znaleziono węzła Platforms!")
+		return
+
+	# Zbierz wszystkie TileMapLayer
 	for platform in platforms_node.get_children():
-		# Spróbuj pobrać TileMapLayer z każdej platformy
-		var tilemap = platform.get_node_or_null("TileMapLayer")
-		# Jeśli znaleziono TileMapLayer, dodaj go do tablicy
+		var tilemap: TileMapLayer = platform.get_node_or_null("TileMapLayer")
 		if tilemap:
 			all_tilemaps.append(tilemap)
-	
-	# Sprawdź czy znaleziono jakiekolwiek TileMapLayer
+
 	if all_tilemaps.is_empty():
-		print("BŁĄD: Nie znaleziono żadnych TileMapLayer!")
+		push_error("Main: Nie znaleziono żadnych TileMapLayer!")
 		return
-	
-	# Inicjalizuj zmienne dla skrajnych punktów planszy
-	# INF (infinity) to największa możliwa wartość
-	# -INF to najmniejsza możliwa wartość
-	var min_x = INF      # Najbardziej lewy punkt
-	var min_y = INF      # Najbardziej górny punkt
-	var max_x = -INF     # Najbardziej prawy punkt
-	var max_y = -INF     # Najbardziej dolny punkt
-	
-	# Przejdź przez każdy znaleziony TileMapLayer
+
+	# Znajdź skrajne punkty
+	var min_x: float = INF
+	var min_y: float = INF
+	var max_x: float = -INF
+	var max_y: float = -INF
+
 	for tilemap in all_tilemaps:
-		# Pobierz prostokąt zajmowany przez kafelki w tym TileMapLayer
-		var used_rect = tilemap.get_used_rect()
-		
-		# Pobierz rozmiar pojedynczego kafelka (np. 32x32 piksele)
-		var tile_size = tilemap.tile_set.tile_size
-		
-		# Pobierz globalną pozycję rodzica (platformy)
-		var parent_position = tilemap.get_parent().global_position
-		
-		# Pobierz skalę rodzica (u Ciebie platformy są przeskalowane 2x)
-		var tilemap_scale = tilemap.get_parent().scale
-		
-		# === OBLICZ RZECZYWISTE WYMIARY TEJ PLATFORMY ===
-		# Lewy górny róg platformy (w lokalnych współrzędnych)
-		var local_min_x = used_rect.position.x * tile_size.x * tilemap_scale.x
-		var local_min_y = used_rect.position.y * tile_size.y * tilemap_scale.y
-		
-		# Prawy dolny róg platformy (w lokalnych współrzędnych)
-		# used_rect.size.x to liczba kafelków w poziomie
-		# Mnożymy przez rozmiar kafelka i skalę, żeby dostać piksele
-		var local_max_x = (used_rect.position.x + used_rect.size.x) * tile_size.x * tilemap_scale.x
-		var local_max_y = (used_rect.position.y + used_rect.size.y) * tile_size.y * tilemap_scale.y
-		
-		# === KONWERTUJ NA WSPÓŁRZĘDNE GLOBALNE ===
-		# Dodaj pozycję platformy do lokalnych współrzędnych
+		var used_rect: Rect2i = tilemap.get_used_rect()
+		var tile_size: Vector2i = tilemap.tile_set.tile_size
+		var parent_position: Vector2 = tilemap.get_parent().global_position
+		var tilemap_scale: Vector2 = tilemap.get_parent().scale
+
+		# Oblicz rzeczywiste wymiary
+		var local_min_x: float = used_rect.position.x * tile_size.x * tilemap_scale.x
+		var local_min_y: float = used_rect.position.y * tile_size.y * tilemap_scale.y
+		var local_max_x: float = (used_rect.position.x + used_rect.size.x) * tile_size.x * tilemap_scale.x
+		var local_max_y: float = (used_rect.position.y + used_rect.size.y) * tile_size.y * tilemap_scale.y
+
+		# Konwertuj na współrzędne globalne
 		local_min_x += parent_position.x
 		local_min_y += parent_position.y
 		local_max_x += parent_position.x
 		local_max_y += parent_position.y
-		
-		# === AKTUALIZUJ GLOBALNE SKRAJNE PUNKTY ===
-		# Jeśli ta platforma jest bardziej na lewo/górę/prawo/dół
-		# niż poprzednie, zaktualizuj odpowiedni skrajny punkt
-		min_x = min(min_x, local_min_x)  # Weź mniejszą (bardziej lewą) wartość
-		min_y = min(min_y, local_min_y)  # Weź mniejszą (bardziej górną) wartość
-		max_x = max(max_x, local_max_x)  # Weź większą (bardziej prawą) wartość
-		max_y = max(max_y, local_max_y)  # Weź większą (bardziej dolną) wartość
-	
-	# === DODAJ MARGINESY ===
-	# Dodaj małe marginesy dookoła, żeby kamera nie ucinała krawędzi
-	# Zmniejszone marginesy pozwalają graczowi dotrzeć bliżej krawędzi
-	var margin = 5
-	min_x -= margin  # Przesuń lewą krawędź bardziej w lewo
-	min_y -= margin  # Przesuń górną krawędź bardziej do góry
-	max_x += margin  # Przesuń prawą krawędź bardziej w prawo
-	max_y += margin  # Przesuń dolną krawędź bardziej w dół
-	
-	# === USTAW LIMITY KAMERY ===
-	# Konwertuj na int (całkowite) i przypisz do limitów kamery
-	camera.limit_left = int(min_x)
-	camera.limit_top = int(min_y)
-	camera.limit_right = int(max_x)
-	camera.limit_bottom = int(max_y)
-	
-	# === WYPISZ INFORMACJE DIAGNOSTYCZNE ===
-	print("=== LIMITY KAMERY ===")
-	print("Znaleziono platform: ", all_tilemaps.size())
-	print("Left: ", camera.limit_left)
-	print("Top: ", camera.limit_top)
-	print("Right: ", camera.limit_right)
-	print("Bottom: ", camera.limit_bottom)
-	print("Szerokość planszy: ", camera.limit_right - camera.limit_left)
-	print("Wysokość planszy: ", camera.limit_bottom - camera.limit_top)
 
+		# Aktualizuj globalne skrajne punkty
+		min_x = min(min_x, local_min_x)
+		min_y = min(min_y, local_min_y)
+		max_x = max(max_x, local_max_x)
+		max_y = max(max_y, local_max_y)
 
-# === ZARZĄDZANIE WYNIKIEM ===
-# Dodaje punkty do wyniku i aktualizuje wyświetlacz
-func add_score(points):
-	score += points              # Zwiększ wynik o podaną liczbę punktów
-	update_score_display()       # Odśwież tekst na ekranie
+	# Dodaj marginesy i ustaw limity kamery
+	if camera:
+		camera.limit_left = int(min_x - CAMERA_MARGIN)
+		camera.limit_top = int(min_y - CAMERA_MARGIN)
+		camera.limit_right = int(max_x + CAMERA_MARGIN)
+		camera.limit_bottom = int(max_y + CAMERA_MARGIN)
 
 
 # === PODŁĄCZANIE MONET ===
-# Znajduje wszystkie monety w grze i podłącza ich sygnał "collected"
-func connect_coins():
-	# Pobierz wszystkie węzły należące do grupy "coins"
-	var coins = get_tree().get_nodes_in_group("coins")
-	
-	# Przejdź przez każdą monetę
+func _connect_coins() -> void:
+	var coins: Array[Node] = get_tree().get_nodes_in_group("coins")
+
 	for coin in coins:
-		# Podłącz sygnał "collected" monety do funkcji "_on_coin_collected"
-		coin.collected.connect(_on_coin_collected)
+		if coin.has_signal("collected"):
+			coin.collected.connect(_on_coin_collected)
 
 
-# === OBSŁUGA ZEBRANIA MONETY ===
-# Wywoływana gdy jakakolwiek moneta wyśle sygnał "collected"
-func _on_coin_collected():
-	add_score(1)  # Dodaj 1 punkt za zebrane monetę
+func _on_coin_collected() -> void:
+	if GameState:
+		GameState.add_score(1)
 
 
 # === AKTUALIZACJA WYŚWIETLACZA ===
-# Odświeża tekst etykiety z aktualnym wynikiem
-func update_score_display():
-	score_label.text = "Score: " + str(score)
+func _update_score_display() -> void:
+	if score_label and GameState:
+		score_label.text = "Score: " + str(GameState.get_score())
