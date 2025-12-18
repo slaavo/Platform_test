@@ -1,5 +1,5 @@
-class_name Platform
 @tool
+class_name Platform
 extends Node2D
 
 # === PARAMETRY ROZMIARU PLATFORMY ===
