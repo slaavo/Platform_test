@@ -36,6 +36,7 @@ func _ready() -> void:
 	add_to_group("player")
 	_setup_dust_effects()
 	sprite_anim.play("run")
+	sprite_anim.pause()
 
 
 func _setup_dust_effects() -> void:
@@ -50,6 +51,7 @@ func _physics_process(delta: float) -> void:
 	_handle_movement()
 	_handle_jump()
 	_update_sprite_direction()
+	_update_animation()
 	_update_walk_dust()
 
 	# Zapamiętaj prędkość przed ruchem
@@ -85,6 +87,16 @@ func _update_sprite_direction() -> void:
 	if sprite and velocity.x != 0:
 		sprite.flip_h = velocity.x < 0
 		sprite_anim.flip_h = velocity.x < 0
+
+
+func _update_animation() -> void:
+	var is_running: bool = is_on_floor() and abs(velocity.x) > MIN_WALK_VELOCITY
+	if is_running:
+		if not sprite_anim.is_playing():
+			sprite_anim.play("run")
+	else:
+		if sprite_anim.is_playing():
+			sprite_anim.pause()
 
 
 func _update_walk_dust() -> void:
