@@ -11,10 +11,8 @@ const MIN_WALK_VELOCITY: float = 10.0
 @export var platform: Node2D
 
 # === REFERENCJE DO WĘZŁÓW ===
-@onready var sprite: Sprite2D = $Sprite2D
+@onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var walk_dust: GPUParticles2D = $WalkDust
-
-@onready var sprite_anim: AnimatedSprite2D = $AnimatedSprite2D
 
 # === ZMIENNE WEWNĘTRZNE ===
 var direction: int = 1
@@ -27,7 +25,7 @@ func _ready() -> void:
 	add_to_group("enemy")
 	direction = 1 if start_moving_right else -1
 	_setup_dust_effects()
-	sprite_anim.play("run")	
+	sprite.play("run")	
 
 	# Poczekaj jedną klatkę, aż platforma się zainicjalizuje
 	await get_tree().process_frame
@@ -63,11 +61,12 @@ func _setup_bounds() -> void:
 	var platform_width: float = platform_width_tiles * tile_size.x * platform_scale.x
 
 	# Oblicz rzeczywisty rozmiar robota
-	if not sprite or not sprite.texture:
+	if not sprite or not sprite.sprite_frames:
 		push_error("Enemy: Brak sprite'a lub tekstury!")
 		return
 
-	var robot_size: Vector2 = sprite.texture.get_size() * sprite.scale * scale
+	var frame_texture: Texture2D = sprite.sprite_frames.get_frame_texture("run", 0)
+	var robot_size: Vector2 = frame_texture.get_size() * sprite.scale * scale
 
 	# Oblicz granice ruchu
 	var robot_half_width: float = robot_size.x / 2.0
@@ -126,5 +125,3 @@ func _check_bounds() -> void:
 func _flip_sprite() -> void:
 	if sprite:
 		sprite.flip_h = (direction == -1)
-	if sprite_anim:
-		sprite_anim.flip_h = (direction == -1)

@@ -6,11 +6,8 @@ const TERMINAL_VELOCITY: float = 4000.0
 const MIN_WALK_VELOCITY: float = 50.0
 const MIN_LAND_DUST_VELOCITY: float = 500.0
 
-@onready var sprite_anim: AnimatedSprite2D = $Node2D/AnimatedSprite2D
-
-
 # === REFERENCJE DO WĘZŁÓW ===
-@onready var sprite: Sprite2D = $Node2D/Sprite2D
+@onready var sprite: AnimatedSprite2D = $Node2D/AnimatedSprite2D
 @onready var camera: Camera2D = $Camera2D
 @onready var walk_dust: GPUParticles2D = $WalkDust
 @onready var land_dust: GPUParticles2D = $LandDust
@@ -35,8 +32,8 @@ var enemy_shake_cooldown: float = 0.0
 func _ready() -> void:
 	add_to_group("player")
 	_setup_dust_effects()
-	sprite_anim.play("walk")
-	sprite_anim.pause()
+	sprite.play("walk")
+	sprite.pause()
 
 
 func _setup_dust_effects() -> void:
@@ -86,17 +83,16 @@ func _handle_jump() -> void:
 func _update_sprite_direction() -> void:
 	if sprite and velocity.x != 0:
 		sprite.flip_h = velocity.x < 0
-		sprite_anim.flip_h = velocity.x < 0
 
 
 func _update_animation() -> void:
 	var is_running: bool = is_on_floor() and abs(velocity.x) > MIN_WALK_VELOCITY
 	if is_running:
-		if not sprite_anim.is_playing():
-			sprite_anim.play("walk")
+		if not sprite.is_playing():
+			sprite.play("walk")
 	else:
-		if sprite_anim.is_playing():
-			sprite_anim.pause()
+		if sprite.is_playing():
+			sprite.pause()
 
 
 func _update_walk_dust() -> void:

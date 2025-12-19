@@ -1,8 +1,7 @@
-[gd_scene load_steps=80 format=3 uid="uid://b5jx1gmw1nomu"]
+[gd_scene load_steps=79 format=3 uid="uid://b5jx1gmw1nomu"]
 
 [ext_resource type="Script" uid="uid://dpsoidpbmvc37" path="res://player.gd" id="1_4flbx"]
 [ext_resource type="Texture2D" uid="uid://bfs7xwbxtx2vy" path="res://assets/bitmaps/soldier/soldier_walk_animation.png" id="3_2hs0m"]
-[ext_resource type="Texture2D" uid="uid://bo2u5pkhxv2io" path="res://assets/bitmaps/soldier/soldier.png" id="3_i3pqv"]
 [ext_resource type="Texture2D" uid="uid://dati1f56567jr" path="res://assets/bitmaps/soldier/soldier_run_animation.png" id="3_sweqy"]
 [ext_resource type="Script" uid="uid://bugujx5kj3r6o" path="res://camera_shake.gd" id="4_hqtel"]
 
@@ -532,10 +531,6 @@ script = ExtResource("1_4flbx")
 
 [node name="Node2D" type="Node2D" parent="."]
 scale = Vector2(0.4, 0.4)
-
-[node name="Sprite2D" type="Sprite2D" parent="Node2D"]
-visible = false
-texture = ExtResource("3_i3pqv")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Node2D"]
 scale = Vector2(1.3, 1.3)
