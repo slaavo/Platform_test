@@ -7,7 +7,7 @@ extends Node2D
 const FONT: FontFile = preload("res://assets/fonts/BebasNeue-Regular.ttf")
 
 # === PARAMETRY ANIMACJI ===
-const LIFETIME: float = 2.0
+const LIFETIME: float = 1.0
 const RISE_HEIGHT: float = 120.0
 const DRIFT_RANGE: float = 40.0
 const FONT_SIZE: int = 48
