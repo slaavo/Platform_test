@@ -8,6 +8,10 @@ const MIN_LAND_DUST_VELOCITY: float = 500.0
 
 # === SCENY ===
 const SparkEffectScene: PackedScene = preload("res://spark_effect.tscn")
+const FloatingScoreScene: PackedScene = preload("res://floating_score.tscn")
+
+# === PUNKTY ===
+const ENEMY_COLLISION_PENALTY: int = 10
 
 # === REFERENCJE DO WĘZŁÓW ===
 @onready var sprite: AnimatedSprite2D = $Node2D/AnimatedSprite2D
@@ -143,10 +147,12 @@ func _check_enemy_collision(delta: float) -> void:
 
 		# Sprawdź czy obiekt jest wrogiem
 		if collider and collider.is_in_group("enemy"):
-			# Wywołaj shake i iskry tylko jeśli cooldown minął
+			# Wywołaj efekty tylko jeśli cooldown minął
 			if enemy_shake_cooldown <= 0:
+				var collision_pos: Vector2 = collision.get_position()
 				_trigger_camera_shake()
-				_spawn_sparks(collision.get_position())
+				_spawn_sparks(collision_pos)
+				_apply_enemy_penalty(collision_pos)
 				enemy_shake_cooldown = enemy_shake_cooldown_time
 			break
 
@@ -155,3 +161,14 @@ func _spawn_sparks(collision_position: Vector2) -> void:
 	var sparks: SparkEffect = SparkEffectScene.instantiate()
 	sparks.global_position = collision_position
 	get_tree().current_scene.add_child(sparks)
+
+
+func _apply_enemy_penalty(collision_position: Vector2) -> void:
+	# Odejmij punkty
+	if GameState:
+		GameState.remove_points(ENEMY_COLLISION_PENALTY, "enemy")
+
+	# Pokaż floating score
+	var floating: FloatingScore = FloatingScoreScene.instantiate()
+	floating.setup(-ENEMY_COLLISION_PENALTY, collision_position)
+	get_tree().current_scene.add_child(floating)

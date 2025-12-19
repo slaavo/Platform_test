@@ -3,12 +3,14 @@ extends Node
 
 # === SYGNAŁY ===
 signal score_changed(new_score: int)
+signal points_changed(amount: int, new_total: int, source: String)
 signal player_died
 signal player_respawned
 
 # === STAN GRY ===
-var score: int = 0
-var high_score: int = 0
+const STARTING_SCORE: int = 100
+var score: int = STARTING_SCORE
+var high_score: int = STARTING_SCORE
 
 # === POZYCJA STARTOWA GRACZA ===
 var player_spawn_position: Vector2 = Vector2.ZERO
@@ -20,15 +22,25 @@ func _ready() -> void:
 
 
 # === ZARZĄDZANIE WYNIKIEM ===
-func add_score(points: int) -> void:
-	score += points
+func add_points(amount: int, source: String = "unknown") -> void:
+	score += amount
 	if score > high_score:
 		high_score = score
 	score_changed.emit(score)
+	points_changed.emit(amount, score, source)
+
+
+func remove_points(amount: int, source: String = "unknown") -> void:
+	add_points(-amount, source)
+
+
+# Zachowanie kompatybilności wstecznej
+func add_score(points: int) -> void:
+	add_points(points, "legacy")
 
 
 func reset_score() -> void:
-	score = 0
+	score = STARTING_SCORE
 	score_changed.emit(score)
 
 

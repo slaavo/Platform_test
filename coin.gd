@@ -4,6 +4,12 @@ extends Node2D
 # === SYGNAŁY ===
 signal collected
 
+# === SCENY ===
+const FloatingScoreScene: PackedScene = preload("res://floating_score.tscn")
+
+# === PARAMETRY ===
+const POINTS_VALUE: int = 1
+
 # === PARAMETRY ANIMACJI ZNIKANIA ===
 @export var float_speed: float = 150.0
 @export var fade_duration: float = 0.5
@@ -69,6 +75,9 @@ func _on_body_entered(body: Node2D) -> void:
 	# Wyślij sygnał
 	collected.emit()
 
+	# Spawn efektu punktów
+	_spawn_floating_score()
+
 	# Wyłącz kolizję
 	if area:
 		area.set_deferred("monitoring", false)
@@ -76,3 +85,9 @@ func _on_body_entered(body: Node2D) -> void:
 	# Rozpocznij animację znikania
 	is_collected = true
 	fade_timer = fade_duration
+
+
+func _spawn_floating_score() -> void:
+	var floating: FloatingScore = FloatingScoreScene.instantiate()
+	floating.setup(POINTS_VALUE, global_position)
+	get_tree().current_scene.add_child(floating)
