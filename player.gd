@@ -6,6 +6,9 @@ const TERMINAL_VELOCITY: float = 4000.0
 const MIN_WALK_VELOCITY: float = 50.0
 const MIN_LAND_DUST_VELOCITY: float = 500.0
 
+# === SCENY ===
+const SparkEffectScene: PackedScene = preload("res://spark_effect.tscn")
+
 # === REFERENCJE DO WĘZŁÓW ===
 @onready var sprite: AnimatedSprite2D = $Node2D/AnimatedSprite2D
 @onready var camera: Camera2D = $Camera2D
@@ -140,8 +143,15 @@ func _check_enemy_collision(delta: float) -> void:
 
 		# Sprawdź czy obiekt jest wrogiem
 		if collider and collider.is_in_group("enemy"):
-			# Wywołaj shake tylko jeśli cooldown minął
+			# Wywołaj shake i iskry tylko jeśli cooldown minął
 			if enemy_shake_cooldown <= 0:
 				_trigger_camera_shake()
+				_spawn_sparks(collision.get_position())
 				enemy_shake_cooldown = enemy_shake_cooldown_time
 			break
+
+
+func _spawn_sparks(collision_position: Vector2) -> void:
+	var sparks: SparkEffect = SparkEffectScene.instantiate()
+	sparks.global_position = collision_position
+	get_tree().current_scene.add_child(sparks)

@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3 uid="uid://dqeugnujs34hs"]
+
+[ext_resource type="Script" uid="uid://c6hx7my5n7vo5" path="res://spark_effect.gd" id="1_spark"]
+
+[node name="SparkEffect" type="Node2D"]
+script = ExtResource("1_spark")
+
+[node name="GPUParticles2D" type="GPUParticles2D" parent="."]
+emitting = false
+amount = 24
+lifetime = 0.4
+one_shot = true
+explosiveness = 1.0
+visibility_rect = Rect2(-200, -200, 400, 400)
