@@ -91,10 +91,10 @@ Gra platformowa, w której gracz steruje postacią skaczącą po platformach, zb
 ├── dust_utils.gd     # Współdzielone efekty cząsteczkowe kurzu
 └── assets/           # Grafiki i zasoby
     └── bitmaps/
-        ├── coin/     # Sprite'y monety
-        ├── platform/ # Tileset platform
-        ├── robot/    # Sprite przeciwnika
-        └── soldier/  # Sprite'y gracza
+		├── coin/     # Sprite'y monety
+		├── platform/ # Tileset platform
+		├── robot/    # Sprite przeciwnika
+		└── soldier/  # Sprite'y gracza
 ```
 
 ## Architektura kodu
