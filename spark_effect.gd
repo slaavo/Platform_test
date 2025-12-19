@@ -45,15 +45,15 @@ func _setup_particles() -> void:
 	scale_curve_texture.curve = scale_curve
 	material.scale_curve = scale_curve_texture
 
-	# Gradient koloru: ELEKTRYCZNY - biały → cyjan → niebieski
+	# Gradient koloru: żółty → pomarańczowy → czerwony
 	var gradient: Gradient = Gradient.new()
 	gradient.set_offset(0, 0.0)
-	gradient.set_color(0, Color(1.0, 1.0, 1.0, 1.0))  # Biały błysk
-	gradient.add_point(0.15, Color(0.7, 1.0, 1.0, 1.0))  # Jasny cyjan
-	gradient.add_point(0.4, Color(0.3, 0.8, 1.0, 0.9))  # Cyjan
-	gradient.add_point(0.7, Color(0.2, 0.5, 1.0, 0.6))  # Niebieski
+	gradient.set_color(0, Color(1.0, 1.0, 0.4, 1.0))  # Jasny żółty
+	gradient.add_point(0.2, Color(1.0, 0.8, 0.2, 1.0))  # Żółto-pomarańczowy
+	gradient.add_point(0.5, Color(1.0, 0.5, 0.1, 0.8))  # Pomarańczowy
+	gradient.add_point(0.75, Color(1.0, 0.3, 0.1, 0.5))  # Czerwono-pomarańczowy
 	gradient.set_offset(1, 1.0)
-	gradient.set_color(1, Color(0.1, 0.3, 0.8, 0.0))  # Ciemny niebieski, zanika
+	gradient.set_color(1, Color(0.8, 0.1, 0.0, 0.0))  # Czerwony, zanika
 	var gradient_texture: GradientTexture1D = GradientTexture1D.new()
 	gradient_texture.gradient = gradient
 	material.color_ramp = gradient_texture
