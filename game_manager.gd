@@ -8,8 +8,9 @@ signal player_died
 signal player_respawned
 
 # === STAN GRY ===
-var score: int = 0
-var high_score: int = 0
+const STARTING_SCORE: int = 100
+var score: int = STARTING_SCORE
+var high_score: int = STARTING_SCORE
 
 # === POZYCJA STARTOWA GRACZA ===
 var player_spawn_position: Vector2 = Vector2.ZERO
@@ -39,7 +40,7 @@ func add_score(points: int) -> void:
 
 
 func reset_score() -> void:
-	score = 0
+	score = STARTING_SCORE
 	score_changed.emit(score)
 
 
