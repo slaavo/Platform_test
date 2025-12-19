@@ -3,6 +3,9 @@ extends Node2D
 
 @onready var label: Label = $Label
 
+# === CZCIONKA ===
+const FONT: FontFile = preload("res://assets/fonts/BebasNeue-Regular.ttf")
+
 # === PARAMETRY ANIMACJI ===
 const LIFETIME: float = 2.0
 const RISE_HEIGHT: float = 120.0
@@ -42,7 +45,8 @@ func _setup_label() -> void:
 	# Kolor zależny od znaku
 	label.add_theme_color_override("font_color", COLOR_POSITIVE if points_amount >= 0 else COLOR_NEGATIVE)
 
-	# Rozmiar czcionki
+	# Czcionka i rozmiar
+	label.add_theme_font_override("font", FONT)
 	label.add_theme_font_size_override("font_size", FONT_SIZE)
 
 	# Wycentrowanie
