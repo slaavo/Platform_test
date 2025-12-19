@@ -10,11 +10,16 @@ const FONT: FontFile = preload("res://assets/fonts/BebasNeue-Regular.ttf")
 const LIFETIME: float = 2.0
 const RISE_HEIGHT: float = 120.0
 const DRIFT_RANGE: float = 40.0
-const FONT_SIZE: int = 32
+const FONT_SIZE: int = 48
+
+# === STYL TEKSTU ===
+const LABEL_SCALE: Vector2 = Vector2(1.4, 0.8)  # Szerszy, niższy
+const OUTLINE_SIZE: int = 4  # Grubsza obwódka
 
 # === KOLORY ===
 const COLOR_POSITIVE: Color = Color(0.2, 1.0, 0.3, 1.0)  # Zielony
 const COLOR_NEGATIVE: Color = Color(1.0, 0.3, 0.2, 1.0)  # Czerwony
+const OUTLINE_COLOR: Color = Color(0.0, 0.0, 0.0, 0.8)  # Ciemna obwódka
 
 # === ZMIENNE WEWNĘTRZNE ===
 var elapsed_time: float = 0.0
@@ -48,6 +53,13 @@ func _setup_label() -> void:
 	# Czcionka i rozmiar
 	label.add_theme_font_override("font", FONT)
 	label.add_theme_font_size_override("font_size", FONT_SIZE)
+
+	# Outline dla grubszego efektu
+	label.add_theme_constant_override("outline_size", OUTLINE_SIZE)
+	label.add_theme_color_override("font_outline_color", OUTLINE_COLOR)
+
+	# Skala - szerszy i niższy
+	label.scale = LABEL_SCALE
 
 	# Wycentrowanie
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
