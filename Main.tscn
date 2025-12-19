@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://dsrpgbvb7arkg" path="res://coin.tscn" id="2_uu6xs"]
 [ext_resource type="PackedScene" uid="uid://cq4mcsv2gsopt" path="res://platform.tscn" id="4_cm0pq"]
 [ext_resource type="PackedScene" uid="uid://dj6hag1i5wmyu" path="res://enemy.tscn" id="5_fos0i"]
-[ext_resource type="FontFile" path="res://assets/fonts/BebasNeue-Regular.ttf" id="6_font"]
+[ext_resource type="FontFile" uid="uid://bgry600beoi7l" path="res://assets/fonts/BebasNeue-Regular.ttf" id="6_font"]
 
 [sub_resource type="Theme" id="Theme_r0du0"]
 default_font = ExtResource("6_font")
@@ -542,7 +542,7 @@ width_tiles = 1
 height_tiles = 2
 
 [node name="platform24" parent="Platforms" instance=ExtResource("4_cm0pq")]
-position = Vector2(576, 512)
+position = Vector2(576, 542)
 width_tiles = 8
 
 [node name="platform8" parent="Platforms" instance=ExtResource("4_cm0pq")]
@@ -564,7 +564,7 @@ position = Vector2(568, 1280)
 platform = NodePath("../Platforms/platform")
 
 [node name="Enemy2" parent="." node_paths=PackedStringArray("platform") instance=ExtResource("5_fos0i")]
-position = Vector2(834, 432)
+position = Vector2(834, 468)
 platform = NodePath("../Platforms/platform24")
 
 [node name="Enemy3" parent="." node_paths=PackedStringArray("platform") instance=ExtResource("5_fos0i")]
