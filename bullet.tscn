@@ -17,7 +17,7 @@ lock_rotation = true
 script = ExtResource("1_bullet")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-modulate = Color(0.2, 0.15, 0.1, 1)
+modulate = Color(1, 0.9, 0.5, 1)
 texture = SubResource("PlaceholderTexture2D_bullet")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
