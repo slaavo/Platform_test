@@ -419,6 +419,12 @@ func _handle_shoot() -> void:
 		if GameState:
 			GameState.remove_points(SHOOT_COST, "shoot")
 
+		# Pokaż unoszący się tekst z kosztem strzału.
+		var floating: FloatingScore = FloatingScoreScene.instantiate()
+		# Ujemna wartość oznacza stracone punkty (będzie wyświetlona na czerwono).
+		floating.setup(-SHOOT_COST, global_position + Vector2(0, -40))
+		get_tree().current_scene.add_child(floating)
+
 		# Stwórz pocisk.
 		_spawn_bullet()
 
