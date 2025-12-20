@@ -538,7 +538,7 @@ sprite_frames = SubResource("SpriteFrames_b26j0")
 animation = &"walk"
 
 [node name="MuzzlePosition" type="Marker2D" parent="Node2D"]
-position = Vector2(120, 0)
+position = Vector2(170, 0)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, -0.83333206)

@@ -424,12 +424,10 @@ func _spawn_bullet() -> void:
 	# flip_h = true oznacza że gracz patrzy w lewo.
 	var shoot_direction: int = -1 if sprite.flip_h else 1
 
-	# Offset spawnu pocisku - spawujemy go 50px przed graczem,
-	# żeby pocisk nie kolidował od razu z graczem.
-	var spawn_offset: float = 50.0 * shoot_direction
-
-	# Ustaw pozycję pocisku - pozycja lufy + offset w kierunku strzału.
-	bullet.global_position = muzzle_position.global_position + Vector2(spawn_offset, 0)
+	# Ustaw pozycję pocisku na pozycji końca lufy.
+	# Marker MuzzlePosition automatycznie się odwraca gdy sprite jest flip_h,
+	# więc nie potrzebujemy dodatkowego offsetu.
+	bullet.global_position = muzzle_position.global_position
 
 	# Ustaw kierunek pocisku (wywołuje funkcję setup w bullet.gd).
 	bullet.setup(shoot_direction)

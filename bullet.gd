@@ -44,6 +44,9 @@ func _ready() -> void:
 	# Podłącz sygnał kolizji.
 	body_entered.connect(_on_body_entered)
 
+	# Stwórz jasnoszarą teksturę zamiast różowej PlaceholderTexture2D.
+	_create_bullet_texture()
+
 
 # =============================================================================
 # FUNKCJA _on_body_entered() - wywoływana gdy pocisk uderzy w coś
@@ -78,3 +81,21 @@ func setup(shoot_direction: int) -> void:
 	# Obróć sprite jeśli leci w lewo.
 	if direction < 0 and sprite:
 		sprite.flip_h = true
+
+
+# =============================================================================
+# FUNKCJA _create_bullet_texture() - tworzy jasnoszarą teksturę pocisku
+# =============================================================================
+func _create_bullet_texture() -> void:
+	# Stwórz obraz 10x10 pikseli.
+	var image: Image = Image.create(10, 10, false, Image.FORMAT_RGBA8)
+
+	# Wypełnij całą teksturę jasnoszarym kolorem.
+	image.fill(Color(0.85, 0.85, 0.85, 1.0))
+
+	# Stwórz teksturę z obrazu.
+	var texture: ImageTexture = ImageTexture.create_from_image(image)
+
+	# Ustaw teksturę dla sprite'a.
+	if sprite:
+		sprite.texture = texture
