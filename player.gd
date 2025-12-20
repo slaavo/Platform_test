@@ -40,6 +40,15 @@ const SparkEffectScene: PackedScene = preload("res://spark_effect.tscn")
 # Wyświetlanie punktów - unoszący się tekst "+1" lub "-10" pokazujący zdobyte/stracone punkty.
 const FloatingScoreScene: PackedScene = preload("res://floating_score.tscn")
 
+# Pocisk - wystrzeliwany przez gracza.
+const BulletScene: PackedScene = preload("res://bullet.tscn")
+
+# Błysk z lufy - efekt cząsteczkowy przy strzale.
+const MuzzleFlashScene: PackedScene = preload("res://muzzle_flash.tscn")
+
+# Dym z lufy - efekt cząsteczkowy po strzale.
+const GunSmokeScene: PackedScene = preload("res://gun_smoke.tscn")
+
 
 # =============================================================================
 # PUNKTY - wartości związane z systemem punktacji
@@ -66,6 +75,9 @@ const ENEMY_COLLISION_PENALTY: int = 10
 
 # Efekt cząsteczkowy kurzu przy lądowaniu - chmura kurzu przy uderzeniu o ziemię.
 @onready var land_dust: GPUParticles2D = $LandDust
+
+# Marker określający pozycję końca lufy - tutaj pojawią się pociski i efekty.
+@onready var muzzle_position: Marker2D = $Node2D/MuzzlePosition
 
 
 # =============================================================================
@@ -167,6 +179,9 @@ func _physics_process(delta: float) -> void:
 
 	# Obsłuż skakanie gdy gracz wciśnie przycisk skoku.
 	_handle_jump()
+
+	# Obsłuż strzelanie gdy gracz wciśnie przycisk strzału.
+	_handle_shoot()
 
 	# Obróć sprite gracza w kierunku ruchu (lewo lub prawo).
 	_update_sprite_direction()
@@ -383,3 +398,57 @@ func _apply_enemy_penalty(collision_position: Vector2) -> void:
 	# Ujemna wartość oznacza stracone punkty (będzie wyświetlona na czerwono).
 	floating.setup(-ENEMY_COLLISION_PENALTY, collision_position)
 	get_tree().current_scene.add_child(floating)
+
+
+# =============================================================================
+# FUNKCJA _handle_shoot() - obsługuje strzelanie gracza
+# =============================================================================
+func _handle_shoot() -> void:
+	# Sprawdź czy gracz właśnie wcisnął przycisk strzału (lewy przycisk myszy lub F).
+	if Input.is_action_just_pressed("shoot"):
+		# Stwórz pocisk.
+		_spawn_bullet()
+
+		# Stwórz efekty wizualne z lufy (błysk i dym).
+		_spawn_muzzle_effects()
+
+
+# =============================================================================
+# FUNKCJA _spawn_bullet() - tworzy pocisk
+# =============================================================================
+func _spawn_bullet() -> void:
+	# Stwórz nową instancję pocisku.
+	var bullet: RigidBody2D = BulletScene.instantiate()
+
+	# Ustaw pozycję pocisku na pozycji końca lufy.
+	bullet.global_position = muzzle_position.global_position
+
+	# Określ kierunek lotu pocisku na podstawie kierunku patrzenia gracza.
+	# flip_h = true oznacza że gracz patrzy w lewo.
+	var shoot_direction: int = -1 if sprite.flip_h else 1
+
+	# Ustaw kierunek pocisku (wywołuje funkcję setup w bullet.gd).
+	bullet.setup(shoot_direction)
+
+	# Dodaj pocisk do sceny gry.
+	get_tree().current_scene.add_child(bullet)
+
+
+# =============================================================================
+# FUNKCJA _spawn_muzzle_effects() - tworzy efekty wizualne z lufy
+# =============================================================================
+func _spawn_muzzle_effects() -> void:
+	# Stwórz efekt błysku z lufy.
+	var muzzle_flash: GPUParticles2D = MuzzleFlashScene.instantiate()
+	muzzle_flash.global_position = muzzle_position.global_position
+
+	# Odwróć kierunek emisji cząsteczek jeśli gracz patrzy w lewo.
+	if sprite.flip_h:
+		muzzle_flash.process_material.direction.x = -1
+
+	get_tree().current_scene.add_child(muzzle_flash)
+
+	# Stwórz efekt dymu z lufy.
+	var gun_smoke: GPUParticles2D = GunSmokeScene.instantiate()
+	gun_smoke.global_position = muzzle_position.global_position
+	get_tree().current_scene.add_child(gun_smoke)
