@@ -64,6 +64,9 @@ const ENEMY_COLLISION_PENALTY: int = 10
 # @onready oznacza, że te zmienne zostaną ustawione automatycznie
 # gdy scena się załaduje (czyli gdy węzły będą już istnieć).
 
+# Kontener sprite'a gracza - używany do obracania całej grafiki.
+@onready var sprite_container: Node2D = $Node2D
+
 # Animowany sprite gracza - wyświetla obrazek gracza i odtwarza animacje (np. chodzenie).
 @onready var sprite: AnimatedSprite2D = $Node2D/AnimatedSprite2D
 
@@ -253,11 +256,14 @@ func _handle_jump() -> void:
 # FUNKCJA _update_sprite_direction() - obraca sprite w kierunku ruchu
 # =============================================================================
 func _update_sprite_direction() -> void:
-	# Sprawdź czy sprite istnieje i czy gracz się rusza.
-	if sprite and velocity.x != 0:
-		# flip_h = true oznacza odbicie lustrzane w poziomie.
-		# Gdy prędkość jest ujemna (ruch w lewo), odwracamy sprite.
-		sprite.flip_h = velocity.x < 0
+	# Sprawdź czy sprite_container istnieje i czy gracz się rusza.
+	if sprite_container and velocity.x != 0:
+		# Gdy prędkość jest ujemna (ruch w lewo), odwracamy cały kontener sprite'a.
+		# scale.x < 0 oznacza odbicie lustrzane - odwraca sprite, markery i efekty.
+		if velocity.x < 0:
+			sprite_container.scale.x = -0.4  # Lewo - odwrócony
+		else:
+			sprite_container.scale.x = 0.4   # Prawo - normalny
 
 
 # =============================================================================
@@ -421,11 +427,11 @@ func _spawn_bullet() -> void:
 	var bullet: RigidBody2D = BulletScene.instantiate()
 
 	# Określ kierunek lotu pocisku na podstawie kierunku patrzenia gracza.
-	# flip_h = true oznacza że gracz patrzy w lewo.
-	var shoot_direction: int = -1 if sprite.flip_h else 1
+	# scale.x < 0 oznacza że gracz patrzy w lewo.
+	var shoot_direction: int = -1 if sprite_container.scale.x < 0 else 1
 
 	# Ustaw pozycję pocisku na pozycji końca lufy.
-	# Marker MuzzlePosition automatycznie się odwraca gdy sprite jest flip_h,
+	# Marker MuzzlePosition automatycznie się odwraca wraz z kontenerem sprite'a,
 	# więc nie potrzebujemy dodatkowego offsetu.
 	bullet.global_position = muzzle_position.global_position
 
@@ -445,7 +451,7 @@ func _spawn_muzzle_effects() -> void:
 	muzzle_flash.global_position = muzzle_position.global_position
 
 	# Odwróć kierunek emisji cząsteczek jeśli gracz patrzy w lewo.
-	if sprite.flip_h:
+	if sprite_container.scale.x < 0:
 		muzzle_flash.process_material.direction.x = -1
 
 	get_tree().current_scene.add_child(muzzle_flash)
