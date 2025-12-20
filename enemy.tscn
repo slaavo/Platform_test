@@ -269,9 +269,11 @@ size = Vector2(128, 120)
 [node name="Enemy" type="CharacterBody2D"]
 script = ExtResource("1_4gyqm")
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
-position = Vector2(0, 3.36)
+[node name="SpriteContainer" type="Node2D" parent="."]
 scale = Vector2(0.5, 0.5)
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="SpriteContainer"]
+position = Vector2(0, 6.72)
 sprite_frames = SubResource("SpriteFrames_lv0vf")
 animation = &"run"
 frame_progress = 0.7866648

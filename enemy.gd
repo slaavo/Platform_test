@@ -44,8 +44,11 @@ const MIN_WALK_VELOCITY: float = 10.0
 # =============================================================================
 # @onready oznacza że wartości są pobierane gdy węzeł jest gotowy.
 
+# Kontener sprite'a robota - używany do obracania grafiki.
+@onready var sprite_container: Node2D = $SpriteContainer
+
 # Animowany obrazek robota.
-@onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
+@onready var sprite: AnimatedSprite2D = $SpriteContainer/AnimatedSprite2D
 
 # Efekt cząsteczkowy kurzu przy chodzeniu (za stopami robota).
 @onready var walk_dust: GPUParticles2D = $WalkDust
@@ -154,8 +157,8 @@ func _setup_bounds() -> void:
 	# Pobierz teksturę pierwszej klatki animacji "run".
 	var frame_texture: Texture2D = sprite.sprite_frames.get_frame_texture("run", 0)
 
-	# Oblicz rzeczywisty rozmiar robota uwzględniając skalę sprite'a i całego węzła.
-	var robot_size: Vector2 = frame_texture.get_size() * sprite.scale * scale
+	# Oblicz rzeczywisty rozmiar robota uwzględniając skalę kontenera sprite'a i całego węzła.
+	var robot_size: Vector2 = frame_texture.get_size() * sprite_container.scale * scale
 
 	# === OBLICZ GRANICE RUCHU ===
 
@@ -260,7 +263,10 @@ func _check_bounds() -> void:
 # FUNKCJA _flip_sprite() - odwraca obrazek robota
 # =============================================================================
 func _flip_sprite() -> void:
-	if sprite:
-		# flip_h = true oznacza odbicie lustrzane w poziomie.
+	if sprite_container:
+		# Odwracamy cały kontener sprite'a (scale.x < 0 = odbicie lustrzane).
 		# Robot patrzy w lewo gdy direction = -1.
-		sprite.flip_h = (direction == -1)
+		if direction == -1:
+			sprite_container.scale.x = -0.5  # Lewo - odwrócony
+		else:
+			sprite_container.scale.x = 0.5   # Prawo - normalny

@@ -1,0 +1,42 @@
+[gd_scene load_steps=6 format=3 uid="uid://bvqm8xwxwqb"]
+
+[ext_resource type="Script" path="res://bullet_explosion.gd" id="1_explosion"]
+
+[sub_resource type="Curve" id="Curve_explosion_scale"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.2), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Gradient" id="Gradient_explosion"]
+offsets = PackedFloat32Array(0, 0.3, 0.7, 1)
+colors = PackedColorArray(1, 0.8, 0.2, 1, 1, 0.5, 0.1, 1, 0.3, 0.3, 0.3, 0.8, 0.2, 0.2, 0.2, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_explosion"]
+gradient = SubResource("Gradient_explosion")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_explosion"]
+particle_flag_disable_z = true
+emission_shape = 1
+emission_sphere_radius = 5.0
+angle_min = -720.0
+angle_max = 720.0
+direction = Vector3(0, -1, 0)
+spread = 180.0
+initial_velocity_min = 100.0
+initial_velocity_max = 300.0
+angular_velocity_min = -200.0
+angular_velocity_max = 200.0
+gravity = Vector3(0, 400, 0)
+scale_min = 2.0
+scale_max = 6.0
+scale_curve = SubResource("Curve_explosion_scale")
+color_ramp = SubResource("GradientTexture1D_explosion")
+
+[node name="BulletExplosion" type="GPUParticles2D"]
+emitting = false
+amount = 20
+process_material = SubResource("ParticleProcessMaterial_explosion")
+lifetime = 0.8
+one_shot = true
+explosiveness = 0.9
+randomness = 0.5
+script = ExtResource("1_explosion")
