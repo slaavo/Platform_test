@@ -57,6 +57,9 @@ const GunSmokeScene: PackedScene = preload("res://gun_smoke.tscn")
 # Ile punktów gracz traci przy zderzeniu z wrogiem.
 const ENEMY_COLLISION_PENALTY: int = 10
 
+# Ile punktów kosztuje jeden strzał.
+const SHOOT_COST: int = 1
+
 
 # =============================================================================
 # REFERENCJE DO WĘZŁÓW - połączenia z innymi elementami sceny
@@ -412,6 +415,10 @@ func _apply_enemy_penalty(collision_position: Vector2) -> void:
 func _handle_shoot() -> void:
 	# Sprawdź czy gracz właśnie wcisnął przycisk strzału (lewy przycisk myszy lub F).
 	if Input.is_action_just_pressed("shoot"):
+		# Odejmij koszt strzału.
+		if GameState:
+			GameState.remove_points(SHOOT_COST, "shoot")
+
 		# Stwórz pocisk.
 		_spawn_bullet()
 
