@@ -41,15 +41,11 @@ func _ready() -> void:
 	# Ustaw skalę grawitacji dla pocisku.
 	gravity_scale = gravity_scale_value
 
-	# Ustaw prędkość początkową pocisku.
-	linear_velocity = Vector2(speed * direction, 0)
-
-	# Obróć sprite jeśli leci w lewo.
-	if direction < 0 and sprite:
-		sprite.flip_h = true
-
 	# Podłącz sygnał kolizji.
 	body_entered.connect(_on_body_entered)
+
+	# Wyłącz kolizję z graczem (warstwa 1) - pocisk nie powinien odbijać się od gracza.
+	set_collision_mask_value(1, false)
 
 
 # =============================================================================
@@ -73,8 +69,15 @@ func _spawn_explosion() -> void:
 
 
 # =============================================================================
-# FUNKCJA setup() - ustawia kierunek pocisku
+# FUNKCJA setup() - ustawia kierunek i prędkość pocisku
 # =============================================================================
 # Ta funkcja jest wywoływana przez gracza gdy tworzy pocisk.
 func setup(shoot_direction: int) -> void:
 	direction = shoot_direction
+
+	# Ustaw prędkość początkową pocisku w odpowiednim kierunku.
+	linear_velocity = Vector2(speed * direction, 0)
+
+	# Obróć sprite jeśli leci w lewo.
+	if direction < 0 and sprite:
+		sprite.flip_h = true
