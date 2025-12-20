@@ -44,9 +44,6 @@ func _ready() -> void:
 	# Podłącz sygnał kolizji.
 	body_entered.connect(_on_body_entered)
 
-	# Wyłącz kolizję z graczem (warstwa 1) - pocisk nie powinien odbijać się od gracza.
-	set_collision_mask_value(1, false)
-
 
 # =============================================================================
 # FUNKCJA _on_body_entered() - wywoływana gdy pocisk uderzy w coś
