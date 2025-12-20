@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://cpmxjtauiavxo"]
+[gd_scene load_steps=9 format=3 uid="uid://cpmxjtauiavxo"]
 
 [ext_resource type="PackedScene" uid="uid://b5jx1gmw1nomu" path="res://player.tscn" id="1_glv2v"]
 [ext_resource type="Script" uid="uid://c1yxh51304mw5" path="res://main.gd" id="1_r0du0"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://cq4mcsv2gsopt" path="res://platform.tscn" id="4_cm0pq"]
 [ext_resource type="PackedScene" uid="uid://dj6hag1i5wmyu" path="res://enemy.tscn" id="5_fos0i"]
 [ext_resource type="FontFile" uid="uid://bgry600beoi7l" path="res://assets/fonts/BebasNeue-Regular.ttf" id="6_font"]
+[ext_resource type="PackedScene" uid="uid://dqp5vh8j3xn8w" path="res://touch_controls.tscn" id="7_touch"]
 
 [sub_resource type="Theme" id="Theme_r0du0"]
 default_font = ExtResource("6_font")
@@ -576,3 +577,5 @@ platform = NodePath("../Platforms/platform31")
 position = Vector2(1490, -72)
 start_moving_right = false
 platform = NodePath("../Platforms/platform19")
+
+[node name="TouchControls" parent="." instance=ExtResource("7_touch")]
