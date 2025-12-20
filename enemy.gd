@@ -157,8 +157,8 @@ func _setup_bounds() -> void:
 	# Pobierz teksturę pierwszej klatki animacji "run".
 	var frame_texture: Texture2D = sprite.sprite_frames.get_frame_texture("run", 0)
 
-	# Oblicz rzeczywisty rozmiar robota uwzględniając skalę sprite'a i całego węzła.
-	var robot_size: Vector2 = frame_texture.get_size() * sprite.scale * scale
+	# Oblicz rzeczywisty rozmiar robota uwzględniając skalę kontenera sprite'a i całego węzła.
+	var robot_size: Vector2 = frame_texture.get_size() * sprite_container.scale * scale
 
 	# === OBLICZ GRANICE RUCHU ===
 
