@@ -1,15 +1,36 @@
-[gd_scene load_steps=8 format=3 uid="uid://dqp5vh8j3xn8w"]
+[gd_scene load_steps=10 format=3 uid="uid://dqp5vh8j3xn8w"]
 
 [ext_resource type="Script" path="res://touch_controls.gd" id="1_touch"]
 
 [sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_dpad"]
-size = Vector2(100, 100)
+size = Vector2(140, 140)
 
 [sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_jump"]
-size = Vector2(150, 150)
+size = Vector2(200, 100)
 
 [sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_shoot"]
-size = Vector2(150, 150)
+size = Vector2(200, 100)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dpad"]
+bg_color = Color(0.3, 0.3, 0.3, 0.6)
+corner_radius_top_left = 70
+corner_radius_top_right = 70
+corner_radius_bottom_right = 70
+corner_radius_bottom_left = 70
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jump"]
+bg_color = Color(0.2, 0.7, 0.2, 0.7)
+corner_radius_top_left = 50
+corner_radius_top_right = 50
+corner_radius_bottom_right = 50
+corner_radius_bottom_left = 50
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_shoot"]
+bg_color = Color(0.85, 0.2, 0.2, 0.7)
+corner_radius_top_left = 50
+corner_radius_top_right = 50
+corner_radius_bottom_right = 50
+corner_radius_bottom_left = 50
 
 [node name="TouchControls" type="CanvasLayer"]
 script = ExtResource("1_touch")
@@ -19,84 +40,84 @@ layout_mode = 3
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_left = 50.0
-offset_top = -350.0
-offset_right = 350.0
+offset_left = 40.0
+offset_top = -450.0
+offset_right = 400.0
 offset_bottom = -50.0
 grow_vertical = 0
 
 [node name="ButtonLeft" type="TouchScreenButton" parent="DPadContainer"]
-position = Vector2(0, 100)
+position = Vector2(0, 140)
 texture_normal = SubResource("PlaceholderTexture2D_dpad")
 action = "ui_left"
 visibility_mode = 1
 
-[node name="ColorRect" type="ColorRect" parent="DPadContainer/ButtonLeft"]
-offset_right = 100.0
-offset_bottom = 100.0
-color = Color(0.3, 0.3, 0.3, 0.5)
+[node name="Panel" type="Panel" parent="DPadContainer/ButtonLeft"]
+offset_right = 140.0
+offset_bottom = 140.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_dpad")
 
 [node name="Label" type="Label" parent="DPadContainer/ButtonLeft"]
-offset_right = 100.0
-offset_bottom = 100.0
-theme_override_font_sizes/font_size = 48
+offset_right = 140.0
+offset_bottom = 140.0
+theme_override_font_sizes/font_size = 64
 text = "◄"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="ButtonRight" type="TouchScreenButton" parent="DPadContainer"]
-position = Vector2(200, 100)
+position = Vector2(280, 140)
 texture_normal = SubResource("PlaceholderTexture2D_dpad")
 action = "ui_right"
 visibility_mode = 1
 
-[node name="ColorRect" type="ColorRect" parent="DPadContainer/ButtonRight"]
-offset_right = 100.0
-offset_bottom = 100.0
-color = Color(0.3, 0.3, 0.3, 0.5)
+[node name="Panel" type="Panel" parent="DPadContainer/ButtonRight"]
+offset_right = 140.0
+offset_bottom = 140.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_dpad")
 
 [node name="Label" type="Label" parent="DPadContainer/ButtonRight"]
-offset_right = 100.0
-offset_bottom = 100.0
-theme_override_font_sizes/font_size = 48
+offset_right = 140.0
+offset_bottom = 140.0
+theme_override_font_sizes/font_size = 64
 text = "►"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="ButtonUp" type="TouchScreenButton" parent="DPadContainer"]
-position = Vector2(100, 0)
+position = Vector2(140, 0)
 texture_normal = SubResource("PlaceholderTexture2D_dpad")
 action = "ui_up"
 visibility_mode = 1
 
-[node name="ColorRect" type="ColorRect" parent="DPadContainer/ButtonUp"]
-offset_right = 100.0
-offset_bottom = 100.0
-color = Color(0.3, 0.3, 0.3, 0.5)
+[node name="Panel" type="Panel" parent="DPadContainer/ButtonUp"]
+offset_right = 140.0
+offset_bottom = 140.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_dpad")
 
 [node name="Label" type="Label" parent="DPadContainer/ButtonUp"]
-offset_right = 100.0
-offset_bottom = 100.0
-theme_override_font_sizes/font_size = 48
+offset_right = 140.0
+offset_bottom = 140.0
+theme_override_font_sizes/font_size = 64
 text = "▲"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="ButtonDown" type="TouchScreenButton" parent="DPadContainer"]
-position = Vector2(100, 200)
+position = Vector2(140, 280)
 texture_normal = SubResource("PlaceholderTexture2D_dpad")
 action = "ui_down"
 visibility_mode = 1
 
-[node name="ColorRect" type="ColorRect" parent="DPadContainer/ButtonDown"]
-offset_right = 100.0
-offset_bottom = 100.0
-color = Color(0.3, 0.3, 0.3, 0.5)
+[node name="Panel" type="Panel" parent="DPadContainer/ButtonDown"]
+offset_right = 140.0
+offset_bottom = 140.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_dpad")
 
 [node name="Label" type="Label" parent="DPadContainer/ButtonDown"]
-offset_right = 100.0
-offset_bottom = 100.0
-theme_override_font_sizes/font_size = 48
+offset_right = 140.0
+offset_bottom = 140.0
+theme_override_font_sizes/font_size = 64
 text = "▼"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -110,45 +131,45 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -250.0
 offset_top = -400.0
-offset_right = -50.0
+offset_right = -30.0
 offset_bottom = -50.0
 grow_horizontal = 0
 grow_vertical = 0
 
 [node name="ButtonJump" type="TouchScreenButton" parent="ActionButtons"]
-position = Vector2(25, 25)
+position = Vector2(10, 50)
 texture_normal = SubResource("PlaceholderTexture2D_jump")
 action = "ui_accept"
 visibility_mode = 1
 
-[node name="ColorRect" type="ColorRect" parent="ActionButtons/ButtonJump"]
-offset_right = 150.0
-offset_bottom = 150.0
-color = Color(0.2, 0.6, 0.2, 0.6)
+[node name="Panel" type="Panel" parent="ActionButtons/ButtonJump"]
+offset_right = 200.0
+offset_bottom = 100.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_jump")
 
 [node name="Label" type="Label" parent="ActionButtons/ButtonJump"]
-offset_right = 150.0
-offset_bottom = 150.0
-theme_override_font_sizes/font_size = 32
+offset_right = 200.0
+offset_bottom = 100.0
+theme_override_font_sizes/font_size = 40
 text = "JUMP"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="ButtonShoot" type="TouchScreenButton" parent="ActionButtons"]
-position = Vector2(25, 200)
+position = Vector2(10, 210)
 texture_normal = SubResource("PlaceholderTexture2D_shoot")
 action = "shoot"
 visibility_mode = 1
 
-[node name="ColorRect" type="ColorRect" parent="ActionButtons/ButtonShoot"]
-offset_right = 150.0
-offset_bottom = 150.0
-color = Color(0.8, 0.2, 0.2, 0.6)
+[node name="Panel" type="Panel" parent="ActionButtons/ButtonShoot"]
+offset_right = 200.0
+offset_bottom = 100.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_shoot")
 
 [node name="Label" type="Label" parent="ActionButtons/ButtonShoot"]
-offset_right = 150.0
-offset_bottom = 150.0
-theme_override_font_sizes/font_size = 32
+offset_right = 200.0
+offset_bottom = 100.0
+theme_override_font_sizes/font_size = 40
 text = "FIRE"
 horizontal_alignment = 1
 vertical_alignment = 1

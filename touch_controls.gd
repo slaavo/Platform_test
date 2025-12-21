@@ -30,18 +30,18 @@ func _ready() -> void:
 # Zastępuje PlaceholderTexture2D (szaro-różowe kwadraty) przezroczystymi teksturami.
 func _setup_transparent_textures() -> void:
 	# Stwórz przezroczyste tekstury dla różnych rozmiarów.
-	var texture_100: ImageTexture = _create_transparent_texture(100, 100)
-	var texture_150: ImageTexture = _create_transparent_texture(150, 150)
+	var texture_140: ImageTexture = _create_transparent_texture(140, 140)  # D-Pad (kółka)
+	var texture_capsule: ImageTexture = _create_transparent_texture(200, 100)  # JUMP/FIRE (kapsułki)
 
 	# Przypisz tekstury do przycisków D-Pad.
-	_set_button_texture("DPadContainer/ButtonLeft", texture_100)
-	_set_button_texture("DPadContainer/ButtonRight", texture_100)
-	_set_button_texture("DPadContainer/ButtonUp", texture_100)
-	_set_button_texture("DPadContainer/ButtonDown", texture_100)
+	_set_button_texture("DPadContainer/ButtonLeft", texture_140)
+	_set_button_texture("DPadContainer/ButtonRight", texture_140)
+	_set_button_texture("DPadContainer/ButtonUp", texture_140)
+	_set_button_texture("DPadContainer/ButtonDown", texture_140)
 
 	# Przypisz tekstury do przycisków akcji.
-	_set_button_texture("ActionButtons/ButtonJump", texture_150)
-	_set_button_texture("ActionButtons/ButtonShoot", texture_150)
+	_set_button_texture("ActionButtons/ButtonJump", texture_capsule)
+	_set_button_texture("ActionButtons/ButtonShoot", texture_capsule)
 
 
 # Tworzy przezroczystą teksturę o podanym rozmiarze.
