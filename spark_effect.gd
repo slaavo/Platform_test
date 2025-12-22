@@ -8,15 +8,13 @@
 # =============================================================================
 
 class_name SparkEffect
-extends Node2D
+extends GPUParticles2D
 
 
 # =============================================================================
-# REFERENCJE DO WĘZŁÓW
+# CACHE DLA TEKSTURY
 # =============================================================================
-
-# System cząsteczek GPU - renderuje wiele małych obiektów (iskier) wydajnie.
-@onready var particles: GPUParticles2D = $GPUParticles2D
+static var _cached_texture: Texture2D = null
 
 
 # =============================================================================
@@ -27,11 +25,11 @@ func _ready() -> void:
 	_setup_particles()
 
 	# Uruchom emisję iskier.
-	particles.emitting = true
+	emitting = true
 
 	# Poczekaj aż iskry znikną, potem usuń efekt.
 	# lifetime + 0.1 daje dodatkowy margines bezpieczeństwa.
-	await get_tree().create_timer(particles.lifetime + 0.1).timeout
+	await get_tree().create_timer(lifetime + 0.1).timeout
 	queue_free()
 
 
@@ -116,13 +114,8 @@ func _setup_particles() -> void:
 	material.emission_sphere_radius = 8.0
 
 	# === USTAWIENIA WĘZŁA CZĄSTECZEK ===
-	particles.process_material = material
-	particles.texture = _get_spark_texture()  # Tekstura pojedynczej iskry.
-	particles.amount = 40                      # Liczba iskier.
-	particles.lifetime = 0.5                   # Czas życia w sekundach.
-	particles.one_shot = true                  # Tylko jedna emisja (nie ciągła).
-	particles.explosiveness = 1.0              # Wszystkie iskry na raz (eksplozja).
-	particles.visibility_rect = Rect2(-300, -300, 600, 600)  # Obszar widoczności.
+	process_material = material
+	texture = _get_spark_texture()  # Tekstura pojedynczej iskry.
 
 
 # =============================================================================
@@ -130,9 +123,12 @@ func _setup_particles() -> void:
 # =============================================================================
 # Generuje okrągłą teksturę z jasnym środkiem i miękkim "glow" na krawędziach.
 # Efekt przypomina rozgrzany punkt - jasny środek, stopniowy zanik na brzegach.
-func _get_spark_texture() -> Texture2D:
-	# Rozmiar tekstury w pikselach (24x24).
-	var size: int = 24
+static func _get_spark_texture() -> Texture2D:
+	if _cached_texture != null:
+		return _cached_texture
+
+	# Rozmiar tekstury w pikselach (8x8).
+	var size: int = 8
 
 	# Stwórz pusty obraz z kanałem alfa (przezroczystość).
 	var image: Image = Image.create(size, size, false, Image.FORMAT_RGBA8)
@@ -171,5 +167,6 @@ func _get_spark_texture() -> Texture2D:
 				# Piksel jest poza kołem - całkowicie przezroczysty.
 				image.set_pixel(x, y, Color(0, 0, 0, 0))
 
-	# Zamień obraz na teksturę.
-	return ImageTexture.create_from_image(image)
+	# Zamień obraz na teksturę i zapisz w cache.
+	_cached_texture = ImageTexture.create_from_image(image)
+	return _cached_texture

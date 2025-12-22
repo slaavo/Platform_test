@@ -2,13 +2,11 @@
 
 [ext_resource type="Script" uid="uid://c6hx7my5n7vo5" path="res://spark_effect.gd" id="1_spark"]
 
-[node name="SparkEffect" type="Node2D"]
-script = ExtResource("1_spark")
-
-[node name="GPUParticles2D" type="GPUParticles2D" parent="."]
+[node name="SparkEffect" type="GPUParticles2D"]
 emitting = false
-amount = 24
-lifetime = 0.4
+amount = 40
+lifetime = 0.5
 one_shot = true
 explosiveness = 1.0
-visibility_rect = Rect2(-200, -200, 400, 400)
+visibility_rect = Rect2(-300, -300, 600, 600)
+script = ExtResource("1_spark")
