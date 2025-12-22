@@ -578,4 +578,13 @@ position = Vector2(1490, -72)
 start_moving_right = false
 platform = NodePath("../Platforms/platform19")
 
+[node name="Enemy6" parent="." node_paths=PackedStringArray("platform") instance=ExtResource("5_fos0i")]
+position = Vector2(704, -330)
+start_moving_right = false
+platform = NodePath("../Platforms/platform20")
+
+[node name="Enemy5" parent="." node_paths=PackedStringArray("platform") instance=ExtResource("5_fos0i")]
+position = Vector2(2688, -72)
+platform = NodePath("../Platforms/platform18")
+
 [node name="TouchControls" parent="." instance=ExtResource("7_touch")]
