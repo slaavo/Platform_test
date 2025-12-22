@@ -59,6 +59,11 @@ func _ready() -> void:
 # FUNKCJA _on_body_entered() - wywoływana gdy pocisk uderzy w coś
 # =============================================================================
 func _on_body_entered(body: Node) -> void:
+	# Sprawdź czy trafiliśmy w wroga.
+	if body.is_in_group("enemy") and body.has_method("die"):
+		# Wywołaj funkcję śmierci wroga.
+		body.die()
+
 	# Stwórz efekt wybuchu w miejscu pocisku.
 	_spawn_explosion()
 

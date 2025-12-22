@@ -71,6 +71,12 @@ var right_bound: float = 0.0
 # Na początku musi poczekać aż platforma się zainicjalizuje.
 var is_ready: bool = false
 
+# Czy robot umiera? Podczas umierania kontynuuje ruch ale nie może ranić gracza.
+var is_dying: bool = false
+
+# Czy robot jest całkowicie martwy (animacja śmierci zakończona)?
+var is_dead: bool = false
+
 
 # =============================================================================
 # FUNKCJA _ready() - wywoływana gdy węzeł jest gotowy
@@ -85,6 +91,9 @@ func _ready() -> void:
 
 	# Skonfiguruj efekt kurzu dla robota (szary kolor - metaliczny).
 	_setup_dust_effects()
+
+	# Podłącz sygnał zakończenia animacji.
+	sprite.animation_finished.connect(_on_animation_finished)
 
 	# Uruchom animację biegu robota.
 	sprite.play("run")
@@ -201,6 +210,13 @@ func _physics_process(delta: float) -> void:
 	if not is_ready:
 		return
 
+	# Jeśli robot jest martwy (animacja śmierci zakończona) - nie rób nic.
+	if is_dead:
+		velocity.x = 0
+		velocity.y += GRAVITY * delta
+		move_and_slide()
+		return
+
 	# === RUCH POZIOMY ===
 	# Prędkość = kierunek (-1 lub 1) × prędkość bazowa.
 	velocity.x = direction * speed
@@ -215,8 +231,9 @@ func _physics_process(delta: float) -> void:
 	# Aktualizuj efekt kurzu (włącz/wyłącz w zależności od ruchu).
 	_update_walk_dust()
 
-	# Sprawdź czy robot dotarł do granicy i powinien zawrócić.
-	_check_bounds()
+	# Sprawdź czy robot dotarł do granicy i powinien zawrócić (tylko jeśli żywy).
+	if not is_dying:
+		_check_bounds()
 
 
 # =============================================================================
@@ -270,3 +287,37 @@ func _flip_sprite() -> void:
 			sprite_container.scale.x = -0.5  # Lewo - odwrócony
 		else:
 			sprite_container.scale.x = 0.5   # Prawo - normalny
+
+
+# =============================================================================
+# FUNKCJA die() - rozpoczyna proces umierania robota
+# =============================================================================
+# Wywoływana gdy robot zostanie trafiony pociskiem.
+# Robot kontynuuje jazdę podczas animacji śmierci, potem się zatrzymuje.
+func die() -> void:
+	# Jeśli już umiera lub jest martwy - nic nie rób.
+	if is_dying or is_dead:
+		return
+
+	# Oznacz robota jako umierającego.
+	is_dying = true
+
+	# Usuń z grupy "enemy" - kolizje z graczem nie będą już powodować efektów.
+	remove_from_group("enemy")
+
+	# Uruchom animację rozsypywania się (break).
+	sprite.play("break")
+
+
+# =============================================================================
+# FUNKCJA _on_animation_finished() - wywoływana gdy animacja się skończy
+# =============================================================================
+func _on_animation_finished() -> void:
+	# Sprawdź czy to była animacja śmierci.
+	if is_dying and sprite.animation == "break":
+		# Robot jest teraz całkowicie martwy - zatrzymaj go.
+		is_dead = true
+
+		# Wyłącz kurz.
+		if walk_dust:
+			walk_dust.emitting = false
