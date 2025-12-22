@@ -20,6 +20,10 @@ config/icon="res://icon.svg"
 
 GameState="*res://game_manager.gd"
 
+[debug]
+
+settings/stdout/print_fps=true
+
 [display]
 
 window/size/viewport_width=1920
@@ -69,7 +73,8 @@ shoot={
 
 [physics]
 
-common/physics_ticks_per_second=120
+2d/run_on_separate_thread=true
+common/physics_interpolation=true
 
 [rendering]
 
