@@ -22,6 +22,23 @@ const GRAVITY: float = 980.0
 # Poniżej tej wartości efekt kurzu się nie włączy.
 const MIN_WALK_VELOCITY: float = 10.0
 
+# Klatka animacji "break" na której robot się zatrzymuje.
+const DEATH_FRAME: int = 32
+
+# Ile punktów gracz dostaje za zabicie robota.
+const KILL_REWARD: int = 20
+
+
+# =============================================================================
+# SCENY - zewnętrzne elementy
+# =============================================================================
+
+# Wyświetlanie punktów - unoszący się tekst pokazujący zdobyte punkty.
+const FloatingScoreScene: PackedScene = preload("res://floating_score.tscn")
+
+# Efekt dymu przy śmierci robota.
+const DeathSmokeScene: PackedScene = preload("res://death_smoke.tscn")
+
 
 # =============================================================================
 # KONFIGURACJA W INSPEKTORZE - parametry edytowalne w Godot
@@ -53,6 +70,9 @@ const MIN_WALK_VELOCITY: float = 10.0
 # Efekt cząsteczkowy kurzu przy chodzeniu (za stopami robota).
 @onready var walk_dust: GPUParticles2D = $WalkDust
 
+# Efekt cząsteczkowy dymu przy śmierci (tworzony dynamicznie).
+var death_smoke: GPUParticles2D = null
+
 
 # =============================================================================
 # ZMIENNE WEWNĘTRZNE - przechowują stan robota
@@ -71,6 +91,12 @@ var right_bound: float = 0.0
 # Na początku musi poczekać aż platforma się zainicjalizuje.
 var is_ready: bool = false
 
+# Czy robot umiera? Podczas umierania kontynuuje ruch ale nie może ranić gracza.
+var is_dying: bool = false
+
+# Czy robot jest całkowicie martwy (animacja śmierci zakończona)?
+var is_dead: bool = false
+
 
 # =============================================================================
 # FUNKCJA _ready() - wywoływana gdy węzeł jest gotowy
@@ -85,6 +111,9 @@ func _ready() -> void:
 
 	# Skonfiguruj efekt kurzu dla robota (szary kolor - metaliczny).
 	_setup_dust_effects()
+
+	# Podłącz sygnał zakończenia animacji.
+	sprite.animation_finished.connect(_on_animation_finished)
 
 	# Uruchom animację biegu robota.
 	sprite.play("run")
@@ -201,6 +230,18 @@ func _physics_process(delta: float) -> void:
 	if not is_ready:
 		return
 
+	# Jeśli robot jest martwy (animacja śmierci zakończona) - nie rób nic.
+	if is_dead:
+		velocity.x = 0
+		velocity.y += GRAVITY * delta
+		move_and_slide()
+		return
+
+	# Sprawdź czy animacja śmierci dotarła do docelowej klatki.
+	if is_dying and sprite.frame >= DEATH_FRAME:
+		_finish_death()
+		return
+
 	# === RUCH POZIOMY ===
 	# Prędkość = kierunek (-1 lub 1) × prędkość bazowa.
 	velocity.x = direction * speed
@@ -215,8 +256,9 @@ func _physics_process(delta: float) -> void:
 	# Aktualizuj efekt kurzu (włącz/wyłącz w zależności od ruchu).
 	_update_walk_dust()
 
-	# Sprawdź czy robot dotarł do granicy i powinien zawrócić.
-	_check_bounds()
+	# Sprawdź czy robot dotarł do granicy i powinien zawrócić (tylko jeśli żywy).
+	if not is_dying:
+		_check_bounds()
 
 
 # =============================================================================
@@ -270,3 +312,79 @@ func _flip_sprite() -> void:
 			sprite_container.scale.x = -0.5  # Lewo - odwrócony
 		else:
 			sprite_container.scale.x = 0.5   # Prawo - normalny
+
+
+# =============================================================================
+# FUNKCJA die() - rozpoczyna proces umierania robota
+# =============================================================================
+# Wywoływana gdy robot zostanie trafiony pociskiem.
+# Robot kontynuuje jazdę podczas animacji śmierci, potem się zatrzymuje.
+func die() -> void:
+	# Jeśli już umiera lub jest martwy - nic nie rób.
+	if is_dying or is_dead:
+		return
+
+	# Oznacz robota jako umierającego.
+	is_dying = true
+
+	# Usuń z grupy "enemy" - kolizje z graczem nie będą już powodować efektów.
+	remove_from_group("enemy")
+
+	# Uruchom animację rozsypywania się (break).
+	sprite.play("break")
+
+	# Przyznaj punkty graczowi.
+	_award_kill_points()
+
+	# Stwórz efekt dymu.
+	_create_death_smoke()
+
+
+# =============================================================================
+# FUNKCJA _finish_death() - kończy proces umierania
+# =============================================================================
+# Wywoływana gdy animacja śmierci dotarła do docelowej klatki.
+func _finish_death() -> void:
+	# Zatrzymaj animację na bieżącej klatce.
+	sprite.pause()
+
+	# Robot jest teraz całkowicie martwy.
+	is_dead = true
+
+	# Wyłącz kurz przy chodzeniu.
+	if walk_dust:
+		walk_dust.emitting = false
+
+
+# =============================================================================
+# FUNKCJA _award_kill_points() - przyznaje punkty za zabicie robota
+# =============================================================================
+func _award_kill_points() -> void:
+	# Dodaj punkty do globalnego stanu gry.
+	if GameState:
+		GameState.add_points(KILL_REWARD, "robot_kill")
+
+	# Stwórz unoszący się tekst pokazujący zdobyte punkty.
+	var floating: FloatingScore = FloatingScoreScene.instantiate()
+	floating.setup(KILL_REWARD, global_position + Vector2(0, -80))
+	get_tree().current_scene.add_child(floating)
+
+
+# =============================================================================
+# FUNKCJA _create_death_smoke() - tworzy efekt dymu przy śmierci
+# =============================================================================
+func _create_death_smoke() -> void:
+	# Stwórz instancję sceny dymu.
+	death_smoke = DeathSmokeScene.instantiate()
+
+	# Dodaj dym jako dziecko robota.
+	add_child(death_smoke)
+
+
+# =============================================================================
+# FUNKCJA _on_animation_finished() - wywoływana gdy animacja się skończy
+# =============================================================================
+func _on_animation_finished() -> void:
+	# Ta funkcja nie jest już używana do obsługi śmierci,
+	# ale zostawiamy ją na wypadek innych animacji.
+	pass

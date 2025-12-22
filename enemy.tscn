@@ -403,7 +403,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_ywceh")
 }],
-"loop": true,
+"loop": false,
 "name": &"break",
 "speed": 60.0
 }, {
@@ -533,9 +533,7 @@ scale = Vector2(0.5, 0.5)
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="SpriteContainer"]
 position = Vector2(0, 6.72)
 sprite_frames = SubResource("SpriteFrames_lv0vf")
-animation = &"break"
-frame = 33
-frame_progress = 0.42373988
+animation = &"run"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, 4)
