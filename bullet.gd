@@ -21,6 +21,13 @@ extends RigidBody2D
 var direction: int = 1
 
 # =============================================================================
+# STATYCZNA TEKSTURA - tworzona raz i używana przez wszystkie pociski
+# =============================================================================
+# Tworzenie tekstury przy każdym pocisku powodowało freeze przy pierwszym strzale.
+# Teraz tekstura jest tworzona raz (lazy loading) i cachowana.
+static var _cached_texture: ImageTexture = null
+
+# =============================================================================
 # SCENY EFEKTÓW
 # =============================================================================
 
@@ -84,18 +91,22 @@ func setup(shoot_direction: int) -> void:
 
 
 # =============================================================================
-# FUNKCJA _create_bullet_texture() - tworzy jasnoszarą teksturę pocisku
+# FUNKCJA _create_bullet_texture() - ustawia jasnoszarą teksturę pocisku
 # =============================================================================
+# Używa statycznej tekstury (tworzonej tylko raz) zamiast tworzenia nowej
+# przy każdym pocisku. Rozwiązuje problem zamrożenia przy pierwszym strzale.
 func _create_bullet_texture() -> void:
-	# Stwórz obraz 10x10 pikseli.
-	var image: Image = Image.create(10, 10, false, Image.FORMAT_RGBA8)
+	# Jeśli tekstura nie została jeszcze utworzona, stwórz ją raz.
+	if _cached_texture == null:
+		# Stwórz obraz 10x10 pikseli.
+		var image: Image = Image.create(10, 10, false, Image.FORMAT_RGBA8)
 
-	# Wypełnij całą teksturę jasnoszarym kolorem.
-	image.fill(Color(0.85, 0.85, 0.85, 1.0))
+		# Wypełnij całą teksturę jasnoszarym kolorem.
+		image.fill(Color(0.85, 0.85, 0.85, 1.0))
 
-	# Stwórz teksturę z obrazu.
-	var texture: ImageTexture = ImageTexture.create_from_image(image)
+		# Stwórz teksturę z obrazu i zapisz ją w statycznej zmiennej.
+		_cached_texture = ImageTexture.create_from_image(image)
 
-	# Ustaw teksturę dla sprite'a.
+	# Ustaw cachowaną teksturę dla sprite'a.
 	if sprite:
-		sprite.texture = texture
+		sprite.texture = _cached_texture
