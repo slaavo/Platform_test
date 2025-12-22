@@ -36,7 +36,7 @@ static func _get_smoke_texture() -> Texture2D:
 	if _cached_texture != null:
 		return _cached_texture
 
-	var size: int = 32
+	var size: int = 8
 	var image: Image = Image.create(size, size, false, Image.FORMAT_RGBA8)
 	var center: Vector2 = Vector2(size / 2.0, size / 2.0)
 	var radius: float = size / 2.0

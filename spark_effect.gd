@@ -127,8 +127,8 @@ static func _get_spark_texture() -> Texture2D:
 	if _cached_texture != null:
 		return _cached_texture
 
-	# Rozmiar tekstury w pikselach (24x24).
-	var size: int = 24
+	# Rozmiar tekstury w pikselach (8x8).
+	var size: int = 8
 
 	# Stwórz pusty obraz z kanałem alfa (przezroczystość).
 	var image: Image = Image.create(size, size, false, Image.FORMAT_RGBA8)
