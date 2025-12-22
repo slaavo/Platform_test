@@ -36,6 +36,9 @@ const KILL_REWARD: int = 20
 # Wyświetlanie punktów - unoszący się tekst pokazujący zdobyte punkty.
 const FloatingScoreScene: PackedScene = preload("res://floating_score.tscn")
 
+# Efekt dymu przy śmierci robota.
+const DeathSmokeScene: PackedScene = preload("res://death_smoke.tscn")
+
 
 # =============================================================================
 # KONFIGURACJA W INSPEKTORZE - parametry edytowalne w Godot
@@ -371,54 +374,8 @@ func _award_kill_points() -> void:
 # FUNKCJA _create_death_smoke() - tworzy efekt dymu przy śmierci
 # =============================================================================
 func _create_death_smoke() -> void:
-	# Stwórz nowy emiter cząsteczek.
-	death_smoke = GPUParticles2D.new()
-	death_smoke.emitting = true
-	death_smoke.amount = 20
-	death_smoke.lifetime = 2.0
-	death_smoke.one_shot = false
-	death_smoke.explosiveness = 0.0
-
-	# Pozycja dymu - nad robotem.
-	death_smoke.position = Vector2(0, -40)
-
-	# Stwórz materiał cząsteczek.
-	var material: ParticleProcessMaterial = ParticleProcessMaterial.new()
-	material.particle_flag_disable_z = true
-
-	# Emisja z małego obszaru.
-	material.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
-	material.emission_sphere_radius = 20.0
-
-	# Kierunek - w górę.
-	material.direction = Vector3(0, -1, 0)
-	material.spread = 30.0
-
-	# Prędkość.
-	material.initial_velocity_min = 20.0
-	material.initial_velocity_max = 50.0
-
-	# Grawitacja - lekko w górę (dym unosi się).
-	material.gravity = Vector3(0, -20, 0)
-
-	# Skala cząsteczek.
-	material.scale_min = 3.0
-	material.scale_max = 6.0
-
-	# Kolor dymu - szary, zanikający.
-	var gradient: Gradient = Gradient.new()
-	gradient.offsets = PackedFloat32Array([0.0, 0.3, 0.7, 1.0])
-	gradient.colors = PackedColorArray([
-		Color(0.4, 0.4, 0.4, 0.6),   # Początek - szary, półprzezroczysty
-		Color(0.35, 0.35, 0.35, 0.4),
-		Color(0.3, 0.3, 0.3, 0.2),
-		Color(0.25, 0.25, 0.25, 0.0) # Koniec - całkowicie przezroczysty
-	])
-	var gradient_texture: GradientTexture1D = GradientTexture1D.new()
-	gradient_texture.gradient = gradient
-	material.color_ramp = gradient_texture
-
-	death_smoke.process_material = material
+	# Stwórz instancję sceny dymu.
+	death_smoke = DeathSmokeScene.instantiate()
 
 	# Dodaj dym jako dziecko robota.
 	add_child(death_smoke)
