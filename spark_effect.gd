@@ -41,32 +41,32 @@ func _ready() -> void:
 func _setup_particles() -> void:
 	# Stwórz nowy materiał dla cząsteczek.
 	# Materiał określa jak cząsteczki się zachowują i wyglądają.
-	var material: ParticleProcessMaterial = ParticleProcessMaterial.new()
+	var particle_material: ParticleProcessMaterial = ParticleProcessMaterial.new()
 
 	# === KIERUNEK EMISJI ===
 	# direction = (0,0,0) + spread = 180° oznacza eksplozję we wszystkie strony.
-	material.direction = Vector3(0, 0, 0)
-	material.spread = 180.0  # Pełne 360 stopni (180° w każdą stronę).
+	particle_material.direction = Vector3(0, 0, 0)
+	particle_material.spread = 180.0  # Pełne 360 stopni (180° w każdą stronę).
 
 	# === PRĘDKOŚĆ WYRZUTU ===
 	# Iskry wylatują z różnymi prędkościami (losowo między min a max).
-	material.initial_velocity_min = 250.0
-	material.initial_velocity_max = 500.0
+	particle_material.initial_velocity_min = 250.0
+	particle_material.initial_velocity_max = 500.0
 
 	# === GRAWITACJA ===
 	# Lekka grawitacja - iskry lecą do góry a potem opadają.
 	# Elektryczne iskry "unoszą się" bardziej niż zwykłe cząstki.
-	material.gravity = Vector3(0, 150, 0)  # Y dodatni = w dół w przestrzeni 3D materiału.
+	particle_material.gravity = Vector3(0, 150, 0)  # Y dodatni = w dół w przestrzeni 3D materiału.
 
 	# === TŁUMIENIE (DAMPING) ===
 	# Iskry zwalniają z czasem (tarcie powietrza).
-	material.damping_min = 100.0
-	material.damping_max = 150.0
+	particle_material.damping_min = 100.0
+	particle_material.damping_max = 150.0
 
 	# === ROZMIAR ISKIER ===
 	# Duże wartości żeby iskry były dobrze widoczne.
-	material.scale_min = 4.0
-	material.scale_max = 8.0
+	particle_material.scale_min = 4.0
+	particle_material.scale_max = 8.0
 
 	# === ZMIANA ROZMIARU W CZASIE ===
 	# Krzywa określa jak rozmiar zmienia się podczas życia cząsteczki.
@@ -80,7 +80,7 @@ func _setup_particles() -> void:
 	# Zamień krzywą na teksturę (wymagane przez system cząsteczek).
 	var scale_curve_texture: CurveTexture = CurveTexture.new()
 	scale_curve_texture.curve = scale_curve
-	material.scale_curve = scale_curve_texture
+	particle_material.scale_curve = scale_curve_texture
 
 	# === GRADIENT KOLORU ===
 	# Iskry zmieniają kolor: żółty → pomarańczowy → czerwony → znikają.
@@ -106,15 +106,15 @@ func _setup_particles() -> void:
 	# Zamień gradient na teksturę.
 	var gradient_texture: GradientTexture1D = GradientTexture1D.new()
 	gradient_texture.gradient = gradient
-	material.color_ramp = gradient_texture
+	particle_material.color_ramp = gradient_texture
 
 	# === KSZTAŁT EMISJI ===
 	# Iskry wylatują z małej kuli (nie z punktu) - wygląda bardziej naturalnie.
-	material.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
-	material.emission_sphere_radius = 8.0
+	particle_material.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
+	particle_material.emission_sphere_radius = 8.0
 
 	# === USTAWIENIA WĘZŁA CZĄSTECZEK ===
-	process_material = material
+	process_material = particle_material
 	texture = _get_spark_texture()  # Tekstura pojedynczej iskry.
 
 
