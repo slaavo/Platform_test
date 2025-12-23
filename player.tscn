@@ -545,6 +545,7 @@ position = Vector2(0, -0.83333206)
 shape = SubResource("RectangleShape2D_i3pqv")
 
 [node name="Camera2D" type="Camera2D" parent="."]
+physics_interpolation_mode = 2
 limit_smoothed = true
 position_smoothing_enabled = true
 position_smoothing_speed = 2.0
