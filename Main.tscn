@@ -1,6 +1,7 @@
-[gd_scene load_steps=9 format=3 uid="uid://cpmxjtauiavxo"]
+[gd_scene load_steps=10 format=3 uid="uid://cpmxjtauiavxo"]
 
 [ext_resource type="PackedScene" uid="uid://b5jx1gmw1nomu" path="res://player.tscn" id="1_glv2v"]
+[ext_resource type="Texture2D" uid="uid://bkgnd2d3840" path="res://assets/bitmaps/background/lost_kingdom_3840x2160.png" id="8_bg"]
 [ext_resource type="Script" uid="uid://c1yxh51304mw5" path="res://main.gd" id="1_r0du0"]
 [ext_resource type="PackedScene" uid="uid://dsrpgbvb7arkg" path="res://coin.tscn" id="2_uu6xs"]
 [ext_resource type="PackedScene" uid="uid://cq4mcsv2gsopt" path="res://platform.tscn" id="4_cm0pq"]
@@ -14,6 +15,15 @@ default_font_size = 48
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_r0du0")
+
+[node name="ParallaxBackground" type="ParallaxBackground" parent="."]
+
+[node name="ParallaxLayer" type="ParallaxLayer" parent="ParallaxBackground"]
+motion_scale = Vector2(0.3, 0.3)
+
+[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/ParallaxLayer"]
+position = Vector2(1920, 1080)
+texture = ExtResource("8_bg")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
