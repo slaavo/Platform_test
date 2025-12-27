@@ -28,7 +28,7 @@ static var _cached_texture: Texture2D = null
 # =============================================================================
 # FUNKCJA get_dust_texture() - zwraca okrągłą teksturę dla cząsteczek
 # =============================================================================
-# Generuje okrągłą teksturę 16x16 pikseli z efektem radialnego gradientu.
+# Generuje okrągłą teksturę 32x32 pikseli z efektem radialnego gradientu.
 # Białe centrum z LINIOWYM zanikaniem do przezroczystości (efekt kurzu).
 #
 # ROZMIAR: 16x16 pikseli (256 pikseli) - WIĘKSZY niż inne efekty:
@@ -52,9 +52,9 @@ static func get_dust_texture() -> Texture2D:
 
 	# === TWORZENIE NOWEJ TEKSTURY ===
 
-	# Rozmiar tekstury w pikselach (16×16 = 256 pikseli).
-	# Większy niż death_smoke (8×8) bo kurz potrzebuje więcej detali.
-	var size: int = 16
+	# Rozmiar tekstury w pikselach (32×32 = 1024 pikseli).
+	# Większy rozmiar dla lepszej jakości i gładszych gradientów.
+	var size: int = 32
 
 	# Stwórz pusty obraz z kanałem alfa (przezroczystość).
 	var image: Image = Image.create(size, size, false, Image.FORMAT_RGBA8)

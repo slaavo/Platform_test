@@ -133,7 +133,7 @@ func _setup_particles() -> void:
 # =============================================================================
 # FUNKCJA _get_spark_texture() - tworzy teksturę iskry
 # =============================================================================
-# Generuje okrągłą teksturę 8x8 pikseli z EKSTREMALNYM efektem "glow".
+# Generuje okrągłą teksturę 32x32 pikseli z EKSTREMALNYM efektem "glow".
 # Największy zasięg świecenia ze wszystkich efektów w projekcie!
 #
 # MATEMATYKA ZANIKANIA - NAJWOLNIEJSZA W CAŁYM PROJEKCIE:
@@ -160,8 +160,8 @@ static func _get_spark_texture() -> Texture2D:
 	if _cached_texture != null:
 		return _cached_texture
 
-	# Rozmiar tekstury w pikselach (8x8 = 64 piksele, bardzo lekka).
-	var size: int = 8
+	# Rozmiar tekstury w pikselach (32x32 = 1024 piksele, lepsza jakość).
+	var size: int = 32
 
 	# Stwórz pusty obraz z kanałem alfa (przezroczystość).
 	var image: Image = Image.create(size, size, false, Image.FORMAT_RGBA8)

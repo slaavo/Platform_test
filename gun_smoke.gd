@@ -41,7 +41,7 @@ func _ready() -> void:
 # =============================================================================
 # FUNKCJA _get_smoke_texture() - tworzy miękką teksturę dymu
 # =============================================================================
-# Generuje okrągłą teksturę 8x8 pikseli z efektem radialnego gradientu.
+# Generuje okrągłą teksturę 32x32 pikseli z efektem radialnego gradientu.
 # Białe centrum z miękkim zanikaniem do przezroczystości (efekt dymu).
 #
 # MATEMATYKA ZANIKANIA - porównanie z innymi efektami:
@@ -53,8 +53,8 @@ static func _get_smoke_texture() -> Texture2D:
 	if _cached_texture != null:
 		return _cached_texture
 
-	# Rozmiar tekstury w pikselach (8x8 = 64 piksele, bardzo lekka).
-	var size: int = 8
+	# Rozmiar tekstury w pikselach (32x32 = 1024 piksele, lepsza jakość).
+	var size: int = 32
 	var image: Image = Image.create(size, size, false, Image.FORMAT_RGBA8)
 	var center: Vector2 = Vector2(size / 2.0, size / 2.0)
 	var radius: float = size / 2.0
