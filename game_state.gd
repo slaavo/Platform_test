@@ -1,5 +1,5 @@
 # =============================================================================
-# GAME_MANAGER.GD - GLOBALNY MENEDŻER STANU GRY
+# GAME_STATE.GD - GLOBALNY MENEDŻER STANU GRY
 # =============================================================================
 # Ten skrypt jest "mózgiem" gry - przechowuje wszystkie ważne informacje które
 # muszą być dostępne z różnych miejsc w grze. Jest to tzw. "Autoload" (Singleton),
@@ -11,7 +11,6 @@
 # - Emitowanie sygnałów gdy coś ważnego się wydarzy (np. zmiana wyniku)
 # =============================================================================
 
-class_name GameManager
 extends Node
 # Node to podstawowy typ węzła - nie ma żadnej grafiki ani fizyki.
 
@@ -22,11 +21,17 @@ extends Node
 # Sygnały to sposób komunikacji w Godot. Gdy coś się wydarzy, skrypt emituje
 # sygnał, a wszystkie podłączone skrypty otrzymują powiadomienie.
 
+# RÓŻNICA MIĘDZY DWOMA SYGNAŁAMI:
+# - score_changed: prosty sygnał dla UI (HUD) - tylko nowa wartość wyniku
+# - points_changed: szczegółowy sygnał dla logiki gry - delta, total, źródło
+
 # Emitowany gdy wynik się zmieni. Przekazuje nową wartość wyniku.
+# Używany głównie przez HUD do aktualizacji wyświetlanego wyniku.
 signal score_changed(new_score: int)
 
 # Emitowany gdy punkty się zmienią. Zawiera szczegółowe informacje.
 # amount = ile punktów dodano/odjęto, new_total = nowy wynik, source = skąd (np. "coin", "enemy")
+# Używany przez systemy które potrzebują wiedzieć SKĄD i ILE punktów przyszło.
 signal points_changed(amount: int, new_total: int, source: String)
 
 # Emitowany gdy gracz zginie.
@@ -78,7 +83,8 @@ func _ready() -> void:
 # source = skąd pochodzą punkty (np. "coin", "enemy", "bonus")
 func add_points(amount: int, source: String = "unknown") -> void:
 	# Dodaj punkty do aktualnego wyniku.
-	score += amount
+	# Clamp do 0 - wynik nie może być ujemny.
+	score = maxi(0, score + amount)
 
 	# Sprawdź czy pobiliśmy rekord.
 	if score > high_score:
@@ -102,6 +108,7 @@ func add_score(points: int) -> void:
 
 
 # Resetuje wynik do wartości początkowej.
+# UWAGA: Resetuje TYLKO score, nie high_score ani player_spawn_position.
 func reset_score() -> void:
 	score = STARTING_SCORE
 	score_changed.emit(score)
@@ -124,6 +131,10 @@ func get_high_score() -> int:
 # Zapisuje pozycję startową gracza.
 # Wywoływane na początku gry przez skrypt Main.
 func set_spawn_position(pos: Vector2) -> void:
+	# Walidacja - ostrzegaj o potencjalnie nieprawidłowych pozycjach.
+	if pos == Vector2.ZERO:
+		push_warning("GameManager: set_spawn_position() wywołana z Vector2.ZERO - czy to zamierzone?")
+
 	player_spawn_position = pos
 
 
@@ -147,6 +158,7 @@ func on_player_respawn() -> void:
 # =============================================================================
 
 # Przywraca grę do stanu początkowego.
+# UWAGA: Obecnie resetuje TYLKO wynik. Nie resetuje high_score ani player_spawn_position.
 # Używane przy restarcie gry.
 func reset_game() -> void:
 	reset_score()

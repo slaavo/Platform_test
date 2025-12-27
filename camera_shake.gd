@@ -28,10 +28,6 @@ var shake_amount: float = 0.0
 # Ile sekund zostało do końca trzęsienia.
 var shake_time_remaining: float = 0.0
 
-# Oryginalna pozycja kamery przed trzęsieniem.
-# Potrzebna żeby wrócić do normalnej pozycji po trzęsieniu.
-var original_offset: Vector2 = Vector2.ZERO
-
 # Czy trzęsienie jest aktywne?
 # Zapobiega problemom gdy nowe trzęsienie zacznie się podczas starego.
 var is_shaking: bool = false
@@ -135,13 +131,23 @@ func _handle_vertical_pan(delta: float) -> void:
 # Wywoływana z zewnątrz (np. przez skrypt gracza) gdy trzeba potrząsnąć kamerą.
 #
 # Parametry:
-#   strength - siła trzęsienia (większa = mocniejsze trzęsienie)
-#   duration - czas trwania w sekundach
+#   strength - siła trzęsienia w pikselach (np. 10.0 = lekkie, 50.0 = silne)
+#   duration - czas trwania w sekundach (np. 0.3)
+#
+# Przykłady użycia:
+#   shake(15.0, 0.3)  # Lekkie trzęsienie przy lądowaniu
+#   shake(30.0, 0.5)  # Mocne trzęsienie przy kolizji z wrogiem
 func shake(strength: float, duration: float) -> void:
-	# Zapamiętaj oryginalny offset TYLKO jeśli nie ma aktywnego trzęsienia.
-	# Zapobiega to zapisaniu "zashake'owanej" pozycji jako oryginalnej.
+	# Walidacja parametrów - ignoruj nieprawidłowe wartości.
+	if strength <= 0.0 or duration <= 0.0:
+		return
+
+	# Ogranicz siłę trzęsienia do rozsądnych wartości (max 100px).
+	# Zapobiega to "ucieczce" kamery poza ekran przy bardzo dużych wartościach.
+	strength = clamp(strength, 0.0, 100.0)
+
+	# Rozpocznij trzęsienie - ustaw flagę.
 	if not is_shaking:
-		original_offset = Vector2(0, vertical_pan_current)
 		is_shaking = true
 
 	# Ustaw parametry trzęsienia.

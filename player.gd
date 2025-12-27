@@ -60,6 +60,9 @@ const ENEMY_COLLISION_PENALTY: int = 10
 # Ile punktów kosztuje jeden strzał.
 const SHOOT_COST: int = 1
 
+# Offset dla wyświetlania floating score przy strzale (nad głową gracza).
+const SHOOT_SCORE_OFFSET: Vector2 = Vector2(0, -40)
+
 
 # =============================================================================
 # REFERENCJE DO WĘZŁÓW - połączenia z innymi elementami sceny
@@ -398,9 +401,9 @@ func _spawn_sparks(collision_position: Vector2) -> void:
 # FUNKCJA _apply_enemy_penalty() - odejmuje punkty i pokazuje efekt
 # =============================================================================
 func _apply_enemy_penalty(collision_position: Vector2) -> void:
-	# Odejmij punkty z globalnego menedżera stanu gry.
+	# Odejmij punkty z globalnego menedżera stanu gry (ujemna wartość).
 	if GameState:
-		GameState.remove_points(ENEMY_COLLISION_PENALTY, "enemy")
+		GameState.add_points(-ENEMY_COLLISION_PENALTY, "enemy")
 
 	# Stwórz unoszący się tekst pokazujący stracone punkty (np. "-10").
 	var floating: FloatingScore = FloatingScoreScene.instantiate()
@@ -415,14 +418,14 @@ func _apply_enemy_penalty(collision_position: Vector2) -> void:
 func _handle_shoot() -> void:
 	# Sprawdź czy gracz właśnie wcisnął przycisk strzału (lewy przycisk myszy lub F).
 	if Input.is_action_just_pressed("shoot"):
-		# Odejmij koszt strzału.
+		# Odejmij koszt strzału (ujemna wartość).
 		if GameState:
-			GameState.remove_points(SHOOT_COST, "shoot")
+			GameState.add_points(-SHOOT_COST, "shoot")
 
 		# Pokaż unoszący się tekst z kosztem strzału.
 		var floating: FloatingScore = FloatingScoreScene.instantiate()
 		# Ujemna wartość oznacza stracone punkty (będzie wyświetlona na czerwono).
-		floating.setup(-SHOOT_COST, global_position + Vector2(0, -40))
+		floating.setup(-SHOOT_COST, global_position + SHOOT_SCORE_OFFSET)
 		get_tree().current_scene.add_child(floating)
 
 		# Stwórz pocisk.
@@ -464,7 +467,7 @@ func _spawn_muzzle_effects() -> void:
 	muzzle_flash.global_position = muzzle_position.global_position
 
 	# Odwróć kierunek emisji cząsteczek jeśli gracz patrzy w lewo.
-	if sprite_container.scale.x < 0:
+	if sprite_container.scale.x < 0 and muzzle_flash.process_material:
 		muzzle_flash.process_material.direction.x = -1
 
 	get_tree().current_scene.add_child(muzzle_flash)

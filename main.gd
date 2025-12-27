@@ -238,8 +238,8 @@ func _connect_coins() -> void:
 # Funkcja wywoływana gdy gracz zbierze monetę.
 func _on_coin_collected() -> void:
 	if GameState:
-		# Dodaj 1 punkt do wyniku.
-		GameState.add_score(1)
+		# Dodaj 1 punkt do wyniku. Używamy add_points() z source dla lepszego trackingu.
+		GameState.add_points(1, "coin")
 
 
 # =============================================================================

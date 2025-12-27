@@ -1,16 +1,13 @@
-[gd_scene load_steps=4 format=3 uid="uid://c8y7qm3xwxwqb"]
+[gd_scene load_steps=3 format=3 uid="uid://c8y7qm3xwxwqb"]
 
 [ext_resource type="Script" uid="uid://m376ejx2xa0d" path="res://bullet.gd" id="1_bullet"]
-
-[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_bullet"]
-size = Vector2(10, 10)
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_bullet"]
 radius = 5.0
 
 [node name="Bullet" type="RigidBody2D"]
-collision_layer = 4
-collision_mask = 15
+collision_layer = 8
+collision_mask = 5
 mass = 0.1
 lock_rotation = true
 contact_monitor = true
@@ -20,7 +17,6 @@ speed = 2500.0
 gravity_scale_value = 1.0
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-texture = SubResource("PlaceholderTexture2D_bullet")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_bullet")

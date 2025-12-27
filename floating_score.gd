@@ -82,13 +82,8 @@ const OUTLINE_COLOR: Color = Color(0.0, 0.0, 0.0, 0.8)
 # ZMIENNE WEWNĘTRZNE
 # =============================================================================
 
-# Ile czasu minęło od stworzenia efektu.
-var elapsed_time: float = 0.0
-
-# Pozycja początkowa (skąd tekst startuje).
-var start_position: Vector2
-
 # Kierunek bocznego dryftu (-1 do 1, losowany przy starcie).
+# Używany w animacji Tween do obliczenia przesunięcia bocznego.
 var drift_direction: float
 
 # Wartość punktów do wyświetlenia.
@@ -99,14 +94,14 @@ var points_amount: int = 0
 # FUNKCJA _ready() - wywoływana gdy węzeł jest gotowy
 # =============================================================================
 func _ready() -> void:
-	# Zapisz pozycję startową.
-	start_position = global_position
-
 	# Wylosuj kierunek dryftu - tekst poleci lekko w lewo lub prawo.
 	drift_direction = randf_range(-1.0, 1.0)
 
 	# Skonfiguruj wygląd etykiety.
 	_setup_label()
+
+	# Uruchom animację Tween.
+	_start_animation()
 
 
 # =============================================================================
@@ -158,64 +153,56 @@ func _setup_label() -> void:
 
 
 # =============================================================================
-# FUNKCJA _process() - wywoływana co klatkę
+# FUNKCJA _start_animation() - uruchamia animację unoszenia i zanikania
 # =============================================================================
-# Aktualizuje pozycję i przezroczystość tekstu.
-func _process(delta: float) -> void:
-	# Zwiększ licznik czasu.
-	elapsed_time += delta
-
-	# Oblicz postęp animacji (0 = początek, 1 = koniec).
-	var progress: float = elapsed_time / LIFETIME
-
-	# Jeśli animacja się skończyła - usuń efekt.
-	if progress >= 1.0:
+# Używa Tween do animacji pozycji i przezroczystości.
+# Bardziej wydajne i czytelne niż ręczna aktualizacja w _process().
+func _start_animation() -> void:
+	# Walidacja - jeśli nie ma etykiety, usuń węzeł.
+	if not label:
 		queue_free()
 		return
 
-	# Zaktualizuj pozycję i przezroczystość.
-	_update_position(progress)
-	_update_opacity(progress)
+	# Zapisz pozycję startową (ustawioną wcześniej przez setup()).
+	var start_pos := global_position
 
+	# Stwórz Tween dla wszystkich animacji.
+	var tween := create_tween()
+	tween.set_parallel(true)  # Wszystkie animacje równolegle!
 
-# =============================================================================
-# FUNKCJA _update_position() - aktualizuje pozycję tekstu
-# =============================================================================
-func _update_position(progress: float) -> void:
-	# === RUCH W GÓRĘ (EASE-OUT) ===
-	# pow(1.0 - progress, 2.0) daje efekt "ease-out":
-	# - Na początku tekst szybko leci w górę
-	# - Pod koniec zwalnia i prawie staje
-	var ease_progress: float = 1.0 - pow(1.0 - progress, 2.0)
-	var rise_offset: float = ease_progress * RISE_HEIGHT
+	# === ANIMACJA POZYCJI Z NIESTANDARDOWYM EASINGIEM ===
+	# tween_method interpoluje wartość progress od 0.0 do 1.0
+	# i przekazuje ją do funkcji lambda która oblicza pozycję.
+	tween.tween_method(
+		func(progress: float) -> void:
+			# === RUCH W GÓRĘ (EASE-OUT) ===
+			# pow(1.0 - progress, 2.0) daje efekt "ease-out":
+			# - Na początku tekst szybko leci w górę
+			# - Pod koniec zwalnia i prawie staje
+			var ease_progress: float = 1.0 - pow(1.0 - progress, 2.0)
+			var rise_offset: float = ease_progress * RISE_HEIGHT
 
-	# === DRYFT BOCZNY (ŁUK) ===
-	# sin(progress * PI) tworzy łuk - tekst odchyla się od środka
-	# i wraca do linii prostej na końcu.
-	# * drift_direction losowo wybiera lewą lub prawą stronę.
-	var drift_offset: float = sin(progress * PI) * DRIFT_RANGE * drift_direction
+			# === DRYFT BOCZNY (ŁUK) ===
+			# sin(progress * PI) tworzy łuk - tekst odchyla się od środka
+			# i wraca do linii prostej na końcu.
+			# drift_direction losowo wybiera lewą lub prawą stronę.
+			var drift_offset: float = sin(progress * PI) * DRIFT_RANGE * drift_direction
 
-	# Oblicz nową pozycję.
-	# start_position + przesunięcie boczne (X) + przesunięcie w górę (ujemny Y).
-	global_position = start_position + Vector2(drift_offset, -rise_offset)
+			# Oblicz nową pozycję.
+			# start_pos + przesunięcie boczne (X) + przesunięcie w górę (ujemny Y).
+			global_position = start_pos + Vector2(drift_offset, -rise_offset),
+		0.0,      # Wartość początkowa progress
+		1.0,      # Wartość końcowa progress
+		LIFETIME  # Czas trwania animacji
+	)
 
-
-# =============================================================================
-# FUNKCJA _update_opacity() - aktualizuje przezroczystość tekstu
-# =============================================================================
-func _update_opacity(progress: float) -> void:
-	if not label:
-		return
-
-	# === FADE OUT ===
+	# === FADE OUT W DRUGIEJ POŁOWIE ===
 	# Tekst jest w pełni widoczny przez pierwszą połowę czasu życia.
-	# Potem zaczyna zanikać.
-	var alpha: float = 1.0
+	# Potem zaczyna zanikać od 1.0 do 0.0.
+	# set_delay() opóźnia start animacji o 0.5s od początku Tween (nie od końca pozycji!).
+	# Dzięki set_parallel(true) delay jest absolutny, nie relatywny.
+	tween.tween_property(label, "modulate:a", 0.0, LIFETIME * 0.5).set_delay(LIFETIME * 0.5)
 
-	if progress > 0.5:
-		# Po połowie czasu: zanikanie od 1.0 do 0.0.
-		# (progress - 0.5) * 2.0 zamienia zakres 0.5-1.0 na 0.0-1.0.
-		alpha = 1.0 - ((progress - 0.5) * 2.0)
-
-	# Zastosuj przezroczystość do etykiety.
-	label.modulate.a = alpha
+	# === AUTO-USUWANIE PO ZAKOŃCZENIU ===
+	# Gdy animacja się skończy, automatycznie usuń węzeł.
+	tween.finished.connect(queue_free)

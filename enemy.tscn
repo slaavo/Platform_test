@@ -525,6 +525,8 @@ animations = [{
 size = Vector2(128, 120)
 
 [node name="Enemy" type="CharacterBody2D"]
+collision_layer = 4
+collision_mask = 3
 script = ExtResource("1_4gyqm")
 
 [node name="SpriteContainer" type="Node2D" parent="."]

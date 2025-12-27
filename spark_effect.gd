@@ -4,7 +4,19 @@
 # Ten skrypt tworzy efekt wizualny eksplozji iskier.
 # Pojawia się gdy gracz zderzy się z wrogiem - żółto-pomarańczowe iskry
 # rozlatują się we wszystkie strony i znikają.
-# Efekt automatycznie się usuwa po zakończeniu emisji.
+#
+# CHARAKTERYSTYKA:
+# - ONE-SHOT efekt (one_shot = true w .tscn, używa finished signal)
+# - NAJDŁUŻSZY "GLOW" ze wszystkich efektów dzięki pow(0.3) = CUBIC ROOT!
+# - Eksplozja 360° (spread = 180°, direction = 0,0,0)
+# - 40 cząsteczek z grawitacją i tłumieniem
+#
+# PORÓWNANIE Z INNYMI EFEKTAMI:
+# - spark_effect: CUBIC ROOT (pow 0.3) - najwolniejsze zanikanie! ← TEN EFEKT
+# - muzzle_flash: SQRT (pow 0.5) - bardzo szybkie
+# - bullet_explosion: pow(1.5) - średnie
+# - gun_smoke/death_smoke: QUADRATIC (pow 2.0) - wolne
+# - dust_utils: LINEAR - stałe
 # =============================================================================
 
 class_name SparkEffect
@@ -27,10 +39,10 @@ func _ready() -> void:
 	# Uruchom emisję iskier.
 	emitting = true
 
-	# Poczekaj aż iskry znikną, potem usuń efekt.
-	# lifetime + 0.1 daje dodatkowy margines bezpieczeństwa.
-	await get_tree().create_timer(lifetime + 0.1).timeout
-	queue_free()
+	# Auto-usuwanie po zakończeniu emisji.
+	# Używamy finished signal zamiast create_timer - bardziej niezawodne!
+	# GPUParticles2D emituje finished gdy wszystkie cząsteczki zakończą życie.
+	finished.connect(queue_free)
 
 
 # =============================================================================
@@ -121,13 +133,34 @@ func _setup_particles() -> void:
 # =============================================================================
 # FUNKCJA _get_spark_texture() - tworzy teksturę iskry
 # =============================================================================
-# Generuje okrągłą teksturę z jasnym środkiem i miękkim "glow" na krawędziach.
-# Efekt przypomina rozgrzany punkt - jasny środek, stopniowy zanik na brzegach.
+# Generuje okrągłą teksturę 8x8 pikseli z EKSTREMALNYM efektem "glow".
+# Największy zasięg świecenia ze wszystkich efektów w projekcie!
+#
+# MATEMATYKA ZANIKANIA - NAJWOLNIEJSZA W CAŁYM PROJEKCIE:
+# - alpha: 1.0 - pow(dist, 0.3) = CUBIC ROOT falloff (∛dist) - NAJWOLNIEJSZE!
+#   * pow(0.3) zanika wolniej niż WSZYSTKIE inne efekty
+#   * Daje maksymalny efekt "glow" - świecenie sięga daleko od środka
+# - brightness: DWUETAPOWY z przepalonym środkiem:
+#   * normalized_dist < 0.3: brightness = 1.0 (pełna jasność, 30% powierzchni)
+#   * normalized_dist >= 0.3: brightness = 1.0 - pow(dist, 0.5) = SQRT falloff
+#
+# PORÓWNANIE EKSPONENTÓW ALPHA (szybkość zanikania):
+# - spark_effect: 0.3 (CUBIC ROOT) - NAJWOLNIEJSZY ← TEN EFEKT, maksymalny glow!
+# - muzzle_flash: 0.5 (SQRT) - bardzo szybki, błysk znika szybko
+# - bullet_explosion: 1.5 - średnie zanikanie
+# - gun_smoke/death_smoke: 2.0 (QUADRATIC) - wolne, miękki dym
+# - dust_utils: brak pow (LINEAR) - stałe zanikanie
+#
+# DLACZEGO POW(0.3) = CUBIC ROOT?
+# - Iskry elektryczne mają charakterystyczny "glow" - świecenie wokół jądra
+# - pow(0.3) < pow(0.5) < pow(1.0) - im mniejszy eksponent, tym wolniejsze zanikanie
+# - ∛x (cubic root) zanika WOLNIEJ niż √x (square root) = dłuższe świecenie
+# - Efekt: iskra ma jasny środek + rozległą aureolę świetlną
 static func _get_spark_texture() -> Texture2D:
 	if _cached_texture != null:
 		return _cached_texture
 
-	# Rozmiar tekstury w pikselach (8x8).
+	# Rozmiar tekstury w pikselach (8x8 = 64 piksele, bardzo lekka).
 	var size: int = 8
 
 	# Stwórz pusty obraz z kanałem alfa (przezroczystość).
@@ -140,33 +173,40 @@ static func _get_spark_texture() -> Texture2D:
 	# Wypełnij obraz piksel po pikselu.
 	for x in range(size):
 		for y in range(size):
-			# Oblicz odległość piksela od środka.
+			# Dodajemy 0.5 żeby próbkować środek piksela (anti-aliasing).
 			var distance: float = Vector2(x + 0.5, y + 0.5).distance_to(center)
 
 			if distance <= radius:
-				# Piksel jest wewnątrz koła.
-
-				# Znormalizuj odległość (0 = środek, 1 = krawędź).
+				# Znormalizowana odległość: 0.0 (środek) → 1.0 (krawędź).
 				var normalized_dist: float = distance / radius
 
-				# Oblicz przezroczystość - mocny efekt "glow".
-				# pow(..., 0.3) sprawia że glow sięga daleko od środka.
+				# === ALPHA (przezroczystość) - CUBIC ROOT FALLOFF ===
+				# pow(dist, 0.3) = pierwiastek trzeciego stopnia (∛)
+				# NAJWOLNIEJSZE zanikanie w całym projekcie!
+				# Efekt: glow sięga bardzo daleko od środka, iskra "świeci".
 				var alpha: float = 1.0 - pow(normalized_dist, 0.3)
 
-				# Oblicz jasność - środek jest "przepalony" (biały).
-				# Wewnętrzne 30% to pełna jasność, potem stopniowy spadek.
+				# === BRIGHTNESS (jasność) - DWUETAPOWY ===
+				# Środek (30% powierzchni): PRZEPALONY (brightness = 1.0, pełna biel)
+				# Krawędzie (70% powierzchni): SQRT falloff (pow 0.5) - szybsze niż alpha!
+				# Efekt: jasne jądro + delikatna aureola (alpha > brightness na krawędziach).
 				var brightness: float
 				if normalized_dist < 0.3:
-					brightness = 1.0  # Przepalony środek.
+					brightness = 1.0  # Przepalony środek - jasne jądro iskry.
 				else:
+					# SQRT falloff dla brightness - zanika szybciej niż alpha.
+					# Dlatego na krawędziach mamy świecącą przezroczystą aureolę!
 					brightness = 1.0 - pow(normalized_dist, 0.5)
 
-				# Ustaw kolor piksela (biały z różną jasnością i przezroczystością).
+				# === KOLOR ===
+				# Grayscale (brightness, brightness, brightness) dla białej iskry.
+				# W połączeniu z ParticleProcessMaterial gradient (żółty→pomarańczowy→czerwony)
+				# daje realistyczny efekt elektrycznych iskier.
 				image.set_pixel(x, y, Color(brightness, brightness, brightness, alpha))
 			else:
-				# Piksel jest poza kołem - całkowicie przezroczysty.
+				# Poza okręgiem = całkowicie przezroczysty.
 				image.set_pixel(x, y, Color(0, 0, 0, 0))
 
-	# Zamień obraz na teksturę i zapisz w cache.
+	# Zapisz teksturę w cache i zwróć.
 	_cached_texture = ImageTexture.create_from_image(image)
 	return _cached_texture

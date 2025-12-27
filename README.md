@@ -40,7 +40,7 @@ Gra platformowa, w której gracz steruje postacią skaczącą po platformach, zb
 - Wyświetlanie wyniku (Score)
 
 ### System gry
-- GameManager (autoload) do zarządzania stanem gry
+- GameState (autoload) do zarządzania stanem gry
 - Globalny wynik zachowywany między scenami
 - Death zone z automatycznym respawnem gracza
 
@@ -77,8 +77,8 @@ Gra platformowa, w której gracz steruje postacią skaczącą po platformach, zb
 
 ```
 ├── main.gd           # Główna logika gry, zarządzanie poziomem
-├── Main.tscn         # Główna scena z poziomem
-├── game_manager.gd   # Autoload - globalny stan gry (wynik, respawn)
+├── main.tscn         # Główna scena z poziomem
+├── game_state.gd     # Autoload - globalny stan gry (wynik, respawn)
 ├── player.gd         # Sterowanie gracza i fizyka
 ├── player.tscn       # Scena gracza
 ├── platform.gd       # Logika generowania platform (@tool)
@@ -109,7 +109,7 @@ Projekt wykorzystuje:
 ## Uruchomienie
 
 1. Otwórz projekt w Godot 4.5
-2. Uruchom scenę `Main.tscn` (F5)
+2. Uruchom scenę `main.tscn` (F5)
 
 ## Sterowanie
 

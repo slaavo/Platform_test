@@ -64,10 +64,14 @@ func _set_button_texture(button_path: String, texture: ImageTexture) -> void:
 
 
 # Sprawdza czy aplikacja działa na urządzeniu mobilnym.
+# Wykrywa zarówno natywne aplikacje (Android/iOS) jak i mobile web (touchscreen).
 func _is_mobile_platform() -> bool:
 	var os_name: String = OS.get_name()
 
-	# Lista platform mobilnych.
-	var mobile_platforms: Array[String] = ["Android", "iOS"]
+	# Sprawdź czy OS to Android lub iOS (natywne aplikacje).
+	if os_name in ["Android", "iOS"]:
+		return true
 
-	return os_name in mobile_platforms
+	# Sprawdź czy urządzenie ma touchscreen (dla mobile web).
+	# Przydatne gdy gra działa w przeglądarce na telefonie/tablecie.
+	return DisplayServer.is_touchscreen_available()
