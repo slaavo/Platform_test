@@ -112,9 +112,6 @@ func _ready() -> void:
 	# Skonfiguruj efekt kurzu dla robota (szary kolor - metaliczny).
 	_setup_dust_effects()
 
-	# Podłącz sygnał zakończenia animacji.
-	sprite.animation_finished.connect(_on_animation_finished)
-
 	# Uruchom animację biegu robota.
 	sprite.play("run")
 
@@ -308,10 +305,9 @@ func _flip_sprite() -> void:
 	if sprite_container:
 		# Odwracamy cały kontener sprite'a (scale.x < 0 = odbicie lustrzane).
 		# Robot patrzy w lewo gdy direction = -1.
-		if direction == -1:
-			sprite_container.scale.x = -0.5  # Lewo - odwrócony
-		else:
-			sprite_container.scale.x = 0.5   # Prawo - normalny
+		# Używamy abs() żeby zachować oryginalną wartość skali (nie hard-coded 0.5).
+		var scale_magnitude: float = abs(sprite_container.scale.x)
+		sprite_container.scale.x = scale_magnitude * direction
 
 
 # =============================================================================
@@ -364,10 +360,21 @@ func _award_kill_points() -> void:
 	if GameState:
 		GameState.add_points(KILL_REWARD, "robot_kill")
 
+	# Sprawdź czy scena floating score jest dostępna.
+	if not FloatingScoreScene:
+		push_error("Enemy: FloatingScoreScene nie jest załadowana!")
+		return
+
+	# Pobierz aktualną scenę.
+	var current_scene: Node = get_tree().current_scene
+	if not current_scene:
+		push_error("Enemy: current_scene jest null!")
+		return
+
 	# Stwórz unoszący się tekst pokazujący zdobyte punkty.
 	var floating: FloatingScore = FloatingScoreScene.instantiate()
 	floating.setup(KILL_REWARD, global_position + Vector2(0, -80))
-	get_tree().current_scene.add_child(floating)
+	current_scene.add_child(floating)
 
 
 # =============================================================================
@@ -385,12 +392,3 @@ func _create_death_smoke() -> void:
 	# Dodaj dym jako dziecko robota.
 	# Dym będzie ciągle lecieć z martwego robota (continuous emission).
 	add_child(death_smoke)
-
-
-# =============================================================================
-# FUNKCJA _on_animation_finished() - wywoływana gdy animacja się skończy
-# =============================================================================
-func _on_animation_finished() -> void:
-	# Ta funkcja nie jest już używana do obsługi śmierci,
-	# ale zostawiamy ją na wypadek innych animacji.
-	pass
