@@ -374,10 +374,16 @@ func _award_kill_points() -> void:
 # FUNKCJA _create_death_smoke() - tworzy efekt dymu przy śmierci
 # =============================================================================
 func _create_death_smoke() -> void:
+	# Sprawdź czy scena dymu jest dostępna.
+	if not DeathSmokeScene:
+		push_error("Enemy: DeathSmokeScene nie jest załadowana!")
+		return
+
 	# Stwórz instancję sceny dymu.
 	death_smoke = DeathSmokeScene.instantiate()
 
 	# Dodaj dym jako dziecko robota.
+	# Dym będzie ciągle lecieć z martwego robota (continuous emission).
 	add_child(death_smoke)
 
 
