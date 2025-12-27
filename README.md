@@ -40,7 +40,7 @@ Gra platformowa, w której gracz steruje postacią skaczącą po platformach, zb
 - Wyświetlanie wyniku (Score)
 
 ### System gry
-- GameManager (autoload) do zarządzania stanem gry
+- GameState (autoload) do zarządzania stanem gry
 - Globalny wynik zachowywany między scenami
 - Death zone z automatycznym respawnem gracza
 

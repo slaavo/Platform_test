@@ -1,5 +1,5 @@
 # =============================================================================
-# GAME_MANAGER.GD - GLOBALNY MENEDŻER STANU GRY
+# GAME_STATE.GD - GLOBALNY MENEDŻER STANU GRY
 # =============================================================================
 # Ten skrypt jest "mózgiem" gry - przechowuje wszystkie ważne informacje które
 # muszą być dostępne z różnych miejsc w grze. Jest to tzw. "Autoload" (Singleton),
@@ -11,7 +11,7 @@
 # - Emitowanie sygnałów gdy coś ważnego się wydarzy (np. zmiana wyniku)
 # =============================================================================
 
-class_name GameManager
+class_name GameState
 extends Node
 # Node to podstawowy typ węzła - nie ma żadnej grafiki ani fizyki.
 
