@@ -168,6 +168,7 @@ func _start_animation() -> void:
 
 	# Stwórz Tween dla wszystkich animacji.
 	var tween := create_tween()
+	tween.set_parallel(true)  # Wszystkie animacje równolegle!
 
 	# === ANIMACJA POZYCJI Z NIESTANDARDOWYM EASINGIEM ===
 	# tween_method interpoluje wartość progress od 0.0 do 1.0
@@ -198,7 +199,8 @@ func _start_animation() -> void:
 	# === FADE OUT W DRUGIEJ POŁOWIE ===
 	# Tekst jest w pełni widoczny przez pierwszą połowę czasu życia.
 	# Potem zaczyna zanikać od 1.0 do 0.0.
-	# set_delay() opóźnia start animacji o pierwszą połowę lifetime.
+	# set_delay() opóźnia start animacji o 0.5s od początku Tween (nie od końca pozycji!).
+	# Dzięki set_parallel(true) delay jest absolutny, nie relatywny.
 	tween.tween_property(label, "modulate:a", 0.0, LIFETIME * 0.5).set_delay(LIFETIME * 0.5)
 
 	# === AUTO-USUWANIE PO ZAKOŃCZENIU ===
