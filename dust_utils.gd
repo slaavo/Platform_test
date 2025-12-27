@@ -28,7 +28,23 @@ static var _cached_texture: Texture2D = null
 # =============================================================================
 # FUNKCJA get_dust_texture() - zwraca okrągłą teksturę dla cząsteczek
 # =============================================================================
-# Tworzy miękkie kółko używane jako tekstura cząsteczek kurzu.
+# Generuje okrągłą teksturę 16x16 pikseli z efektem radialnego gradientu.
+# Białe centrum z LINIOWYM zanikaniem do przezroczystości (efekt kurzu).
+#
+# ROZMIAR: 16x16 pikseli (256 pikseli) - WIĘKSZY niż inne efekty:
+# - dust_utils: 16×16 = 256px (kurz musi być wyraźny i szczegółowy)
+# - death_smoke: 8×8 = 64px (mały, miękki dym)
+# - bullet_explosion: 8×8 = 64px (mały, intensywny wybuch)
+#
+# MATEMATYKA ZANIKANIA - porównanie z innymi efektami:
+# - dust_utils: alpha = 1.0 - (distance / radius) → LINEAR falloff
+# - death_smoke: alpha = pow(1.0 - normalized_dist, 2.0) → QUADRATIC falloff (x²)
+# - bullet_explosion: dwuetapowy falloff (pow 1.5 dla alpha + 0.7 dla brightness)
+#
+# DLACZEGO LINEAR?
+# - Linear daje ostrzejsze, bardziej wyraźne krawędzie
+# - Kurz MUSI być widoczny - użytkownik widzi go tylko przez chwilę
+# - Pow() daje miękkie, stopniowe zanikanie - lepsze dla dymu/mgły
 static func get_dust_texture() -> Texture2D:
 	# Jeśli tekstura już istnieje - zwróć ją z cache.
 	if _cached_texture != null:
@@ -36,7 +52,8 @@ static func get_dust_texture() -> Texture2D:
 
 	# === TWORZENIE NOWEJ TEKSTURY ===
 
-	# Rozmiar tekstury w pikselach (16x16).
+	# Rozmiar tekstury w pikselach (16×16 = 256 pikseli).
+	# Większy niż death_smoke (8×8) bo kurz potrzebuje więcej detali.
 	var size: int = 16
 
 	# Stwórz pusty obraz z kanałem alfa (przezroczystość).
@@ -46,20 +63,44 @@ static func get_dust_texture() -> Texture2D:
 	var center: Vector2 = Vector2(size / 2.0, size / 2.0)
 	var radius: float = size / 2.0
 
-	# Wypełnij obraz piksel po pikselu.
+	# Przejdź przez każdy piksel i oblicz jego kolor na podstawie odległości od środka.
 	for x in range(size):
 		for y in range(size):
-			# Oblicz odległość piksela od środka.
+			# Dodajemy 0.5 żeby próbkować środek piksela (anti-aliasing).
+			# Bez tego tekstura byłaby "pixelowata" z ostrymi schodkami.
 			var distance: float = Vector2(x + 0.5, y + 0.5).distance_to(center)
 
 			if distance <= radius:
-				# Piksel jest wewnątrz koła.
-				# Im bliżej krawędzi, tym bardziej przezroczysty (miękkie krawędzie).
+				# Znormalizowana odległość: 0.0 (środek) → 1.0 (krawędź).
+				# Używana do obliczenia przezroczystości.
+
+				# === ALPHA (przezroczystość) - LINEAR FALLOFF ===
+				# Formuła: alpha = 1.0 - (distance / radius)
+				# Jest to LINIOWE zanikanie - prosta zależność.
+				#
+				# Porównanie z innymi metodami:
+				# - Linear (kurz):     1.0 → 0.0 (stała szybkość)
+				# - Quadratic (dym):   1.0 → 0.0 (szybsze na końcu, pow 2.0)
+				# - Custom (eksplozja): dwuetapowe (pow 1.5 + brightness)
+				#
+				# Wykres zanikania (0 = środek, 1 = krawędź):
+				# Alpha
+				#  1.0 ●─────╲               Linear (to)
+				#      │      ╲
+				#  0.5 │       ●
+				#      │        ╲_____
+				#  0.0 └──────────────●      Quadratic (innych)
+				#      0.0    0.5    1.0     Distance
+				#
 				var alpha: float = 1.0 - (distance / radius)
-				# Biały kolor z obliczoną przezroczystością.
+
+				# === KOLOR ===
+				# Biały (1, 1, 1) dla neutralnego kurzu.
+				# W połączeniu z ParticleProcessMaterial color (COLOR_BROWN/COLOR_GRAY)
+				# daje brązowy kurz dla gracza lub szary kurz dla robotów.
 				image.set_pixel(x, y, Color(1, 1, 1, alpha))
 			else:
-				# Piksel poza kołem - całkowicie przezroczysty.
+				# Poza okręgiem = całkowicie przezroczysty.
 				image.set_pixel(x, y, Color(0, 0, 0, 0))
 
 	# Zapisz teksturę w cache i zwróć.
