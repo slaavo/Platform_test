@@ -11,7 +11,6 @@
 # - Emitowanie sygnałów gdy coś ważnego się wydarzy (np. zmiana wyniku)
 # =============================================================================
 
-class_name GameState
 extends Node
 # Node to podstawowy typ węzła - nie ma żadnej grafiki ani fizyki.
 
