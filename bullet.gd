@@ -10,12 +10,13 @@ extends RigidBody2D
 # =============================================================================
 # KONFIGURACJA KOLIZJI
 # =============================================================================
-# collision_layer = 4 (bit 3) - Pocisk znajduje się na warstwie 3
-# collision_mask = 15 (bity 1-4) - Pocisk koliduje z:
-#   - Layer 1: Player (opcjonalne - można wyłączyć jeśli gracz nie ma blokować pocisków)
-#   - Layer 2: Enemy (roboty - główny cel)
-#   - Layer 3: Bullet (pociski mogą zderzać się z innymi pociskami)
-#   - Layer 4: Platforms (pociski eksplodują przy trafieniu w platformy)
+# collision_layer = 8 (bit 4 - warstwa 4) - Pocisk znajduje się na warstwie 4
+# collision_mask = 5 (bity 1,3 - warstwy 1 i 3) - Pocisk koliduje z:
+#   - Warstwa 1: Platform (platformy, podłoża)
+#   - Warstwa 3: Enemy (roboty - główny cel)
+# NIE koliduje z:
+#   - Warstwa 2: Player (gracz który wystrzelił pocisk)
+#   - Warstwa 5: Collectible (monety)
 
 # =============================================================================
 # PARAMETRY POCISKU
