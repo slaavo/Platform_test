@@ -8,14 +8,27 @@
 extends RigidBody2D
 
 # =============================================================================
+# KONFIGURACJA KOLIZJI
+# =============================================================================
+# collision_layer = 4 (bit 3) - Pocisk znajduje się na warstwie 3
+# collision_mask = 15 (bity 1-4) - Pocisk koliduje z:
+#   - Layer 1: Player (opcjonalne - można wyłączyć jeśli gracz nie ma blokować pocisków)
+#   - Layer 2: Enemy (roboty - główny cel)
+#   - Layer 3: Bullet (pociski mogą zderzać się z innymi pociskami)
+#   - Layer 4: Platforms (pociski eksplodują przy trafieniu w platformy)
+
+# =============================================================================
 # PARAMETRY POCISKU
 # =============================================================================
 
 # Prędkość pozioma pocisku (piksele na sekundę).
-@export var speed: float = 1200.0
+@export var speed: float = 2500.0
 
-# Siła grawitacji działająca na pocisk (mniejsza niż u gracza dla ładniejszej trajektorii).
-@export var gravity_scale_value: float = 0.5
+# Siła grawitacji działająca na pocisk (łuk trajektorii).
+@export var gravity_scale_value: float = 1.0
+
+# Czas życia pocisku w sekundach (auto-niszczenie jeśli nie trafi).
+@export var lifetime: float = 5.0
 
 # Kierunek lotu pocisku (1 = prawo, -1 = lewo).
 var direction: int = 1
@@ -54,6 +67,15 @@ func _ready() -> void:
 	# Stwórz jasnoszarą teksturę zamiast różowej PlaceholderTexture2D.
 	_create_bullet_texture()
 
+	# Ustaw auto-niszczenie pocisku po określonym czasie.
+	# Zapobiega gromadzeniu się pocisków które nie trafiły w nic.
+	var timer := Timer.new()
+	timer.wait_time = lifetime
+	timer.one_shot = true
+	timer.timeout.connect(queue_free)
+	add_child(timer)
+	timer.start()
+
 
 # =============================================================================
 # FUNKCJA _on_body_entered() - wywoływana gdy pocisk uderzy w coś
@@ -75,6 +97,11 @@ func _on_body_entered(body: Node) -> void:
 # FUNKCJA _spawn_explosion() - tworzy efekt wybuchu
 # =============================================================================
 func _spawn_explosion() -> void:
+	# Sprawdź czy scena wybuchu jest dostępna.
+	if not ExplosionEffectScene:
+		push_error("Bullet: ExplosionEffectScene nie jest załadowana!")
+		return
+
 	var explosion: Node2D = ExplosionEffectScene.instantiate()
 	explosion.global_position = global_position
 	get_tree().current_scene.add_child(explosion)
@@ -90,9 +117,9 @@ func setup(shoot_direction: int) -> void:
 	# Ustaw prędkość początkową pocisku w odpowiednim kierunku.
 	linear_velocity = Vector2(speed * direction, 0)
 
-	# Obróć sprite jeśli leci w lewo.
-	if direction < 0 and sprite:
-		sprite.flip_h = true
+	# Obróć sprite jeśli leci w lewo (dla spójności z resztą projektu używamy scale.x).
+	if sprite:
+		sprite.scale.x = -1.0 if direction < 0 else 1.0
 
 
 # =============================================================================
