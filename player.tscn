@@ -527,7 +527,7 @@ size = Vector2(78.333336, 135)
 
 [node name="Player" type="CharacterBody2D"]
 collision_layer = 2
-collision_mask = 13
+collision_mask = 5
 scale = Vector2(1.2, 1.2)
 script = ExtResource("1_4flbx")
 
