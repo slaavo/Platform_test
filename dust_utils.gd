@@ -162,6 +162,7 @@ static func setup_walk_dust(dust_node: GPUParticles2D, dust_color: Color = COLOR
 	dust_node.lifetime = 0.9            # Czas życia w sekundach.
 	dust_node.emitting = false          # Nie emituj na starcie.
 	dust_node.one_shot = false          # Ciągła emisja (nie jednorazowa).
+	dust_node.local_coords = false      # Cząsteczki pozostają w miejscu emisji (nie poruszają się z graczem).
 	dust_node.visibility_rect = Rect2(-50, -50, 100, 100)  # Obszar widoczności.
 
 
@@ -232,4 +233,5 @@ static func setup_land_dust(dust_node: GPUParticles2D, dust_color: Color = COLOR
 	dust_node.emitting = false          # Nie emituj na starcie.
 	dust_node.one_shot = true           # Jednorazowa emisja (burst).
 	dust_node.explosiveness = 1.0       # Wszystkie cząsteczki na raz.
+	dust_node.local_coords = false      # Cząsteczki pozostają w miejscu emisji (nie poruszają się z graczem).
 	dust_node.visibility_rect = Rect2(-200, -100, 400, 200)  # Większy obszar.
