@@ -535,7 +535,7 @@ scale = Vector2(0.5, 0.5)
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="SpriteContainer"]
 position = Vector2(0, 6.72)
 sprite_frames = SubResource("SpriteFrames_lv0vf")
-animation = &"run"
+animation = &"break"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, 4)
@@ -543,3 +543,4 @@ shape = SubResource("RectangleShape2D_7k104")
 
 [node name="WalkDust" type="GPUParticles2D" parent="."]
 position = Vector2(0, 60)
+fixed_fps = 120

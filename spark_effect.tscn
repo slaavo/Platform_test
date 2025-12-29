@@ -8,5 +8,6 @@ amount = 40
 lifetime = 0.5
 one_shot = true
 explosiveness = 1.0
+fixed_fps = 120
 visibility_rect = Rect2(-300, -300, 600, 600)
 script = ExtResource("1_spark")
