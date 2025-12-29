@@ -23,7 +23,7 @@ const GRAVITY: float = 980.0
 const MIN_WALK_VELOCITY: float = 10.0
 
 # Klatka animacji "break" na której robot się zatrzymuje.
-const DEATH_FRAME: int = 32
+const DEATH_FRAME: int = 28
 
 # Ile punktów gracz dostaje za zabicie robota.
 const KILL_REWARD: int = 20
@@ -132,7 +132,7 @@ func _setup_dust_effects() -> void:
 
 		# Dostosuj parametry kurzu specjalnie dla robota.
 		# Robot jest cięższy więc generuje więcej kurzu który dłużej trwa.
-		walk_dust.amount = 60       # Liczba cząsteczek (więcej niż gracz).
+		walk_dust.amount = 20       # Liczba cząsteczek (więcej niż gracz).
 		walk_dust.lifetime = 1.0    # Czas życia cząsteczek w sekundach.
 
 
@@ -192,7 +192,7 @@ func _setup_bounds() -> void:
 	var robot_half_width: float = robot_size.x / 2.0
 
 	# Dodatkowy margines - robot nie podchodzi do samej krawędzi.
-	var extra_margin: float = robot_size.x / 5.0
+	var extra_margin: float = robot_size.x / 10.0
 
 	# Lewa granica = pozycja platformy + połowa robota + margines.
 	left_bound = platform.global_position.x + robot_half_width + extra_margin
@@ -253,9 +253,8 @@ func _physics_process(delta: float) -> void:
 	# Aktualizuj efekt kurzu (włącz/wyłącz w zależności od ruchu).
 	_update_walk_dust()
 
-	# Sprawdź czy robot dotarł do granicy i powinien zawrócić (tylko jeśli żywy).
-	if not is_dying:
-		_check_bounds()
+	# Sprawdź czy robot dotarł do granicy i powinien zawrócić
+	_check_bounds()
 
 
 # =============================================================================

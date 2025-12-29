@@ -1,10 +1,6 @@
-[gd_scene load_steps=6 format=3 uid="uid://cdeath_smoke"]
+[gd_scene load_steps=5 format=3 uid="uid://u6lscoo581l2"]
 
-[ext_resource type="Script" path="res://death_smoke.gd" id="1_smoke"]
-
-[sub_resource type="Curve" id="Curve_smoke_scale"]
-_data = [Vector2(0, 0.5), 0.0, 0.0, 0, 0, Vector2(0.3, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.7), 0.0, 0.0, 0, 0]
-point_count = 3
+[ext_resource type="Script" uid="uid://d4o3it2ssnft" path="res://death_smoke.gd" id="1_smoke"]
 
 [sub_resource type="Gradient" id="Gradient_smoke"]
 offsets = PackedFloat32Array(0, 0.3, 0.7, 1)
@@ -28,17 +24,15 @@ angular_velocity_max = 50.0
 gravity = Vector3(0, -30, 0)
 scale_min = 5.0
 scale_max = 10.0
-scale_curve = SubResource("Curve_smoke_scale")
 color_ramp = SubResource("GradientTexture1D_smoke")
 
 [node name="DeathSmoke" type="GPUParticles2D"]
 position = Vector2(0, -40)
 emitting = false
 amount = 25
-process_material = SubResource("ParticleProcessMaterial_smoke")
 lifetime = 3.5
-one_shot = false
-explosiveness = 0.0
 randomness = 0.4
+fixed_fps = 120
 visibility_rect = Rect2(-150, -300, 300, 350)
+process_material = SubResource("ParticleProcessMaterial_smoke")
 script = ExtResource("1_smoke")

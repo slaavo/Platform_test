@@ -526,9 +526,9 @@ animations = [{
 size = Vector2(78.333336, 135)
 
 [node name="Player" type="CharacterBody2D"]
+scale = Vector2(1.2, 1.2)
 collision_layer = 2
 collision_mask = 5
-scale = Vector2(1.2, 1.2)
 script = ExtResource("1_4flbx")
 
 [node name="Node2D" type="Node2D" parent="."]
@@ -555,6 +555,8 @@ script = ExtResource("4_hqtel")
 
 [node name="WalkDust" type="GPUParticles2D" parent="."]
 position = Vector2(0, 70)
+fixed_fps = 120
 
 [node name="LandDust" type="GPUParticles2D" parent="."]
 position = Vector2(0, 70)
+fixed_fps = 120

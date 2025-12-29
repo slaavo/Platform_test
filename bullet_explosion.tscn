@@ -1,10 +1,6 @@
-[gd_scene load_steps=6 format=3 uid="uid://bvqm8xwxwqb"]
+[gd_scene load_steps=5 format=3 uid="uid://bvqm8xwxwqb"]
 
-[ext_resource type="Script" path="res://bullet_explosion.gd" id="1_explosion"]
-
-[sub_resource type="Curve" id="Curve_explosion_scale"]
-_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.2), 0.0, 0.0, 0, 0]
-point_count = 2
+[ext_resource type="Script" uid="uid://61ri5jjv46vj" path="res://bullet_explosion.gd" id="1_explosion"]
 
 [sub_resource type="Gradient" id="Gradient_explosion"]
 offsets = PackedFloat32Array(0, 0.3, 0.7, 1)
@@ -28,15 +24,15 @@ angular_velocity_max = 200.0
 gravity = Vector3(0, 400, 0)
 scale_min = 2.0
 scale_max = 6.0
-scale_curve = SubResource("Curve_explosion_scale")
 color_ramp = SubResource("GradientTexture1D_explosion")
 
 [node name="BulletExplosion" type="GPUParticles2D"]
 emitting = false
 amount = 20
-process_material = SubResource("ParticleProcessMaterial_explosion")
 lifetime = 0.8
 one_shot = true
 explosiveness = 0.9
 randomness = 0.5
+fixed_fps = 120
+process_material = SubResource("ParticleProcessMaterial_explosion")
 script = ExtResource("1_explosion")
