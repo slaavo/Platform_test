@@ -1,75 +1,53 @@
 # =============================================================================
-# BULLET.GD - SKRYPT POCISKU
+# BULLET.GD - POCISK GRACZA
 # =============================================================================
-# Ten skrypt kontroluje pocisk wystrzelony przez gracza.
-# Obsługuje lot pocisku z grawitacją, wykrywanie kolizji i efekt wybuchu.
+# Pocisk leci w wybranym kierunku z lekką grawitacją (łuk trajektorii).
+# Przy trafieniu w coś tworzy efekt wybuchu. Niszczy się po 5 sekundach.
+#
+# Kolizje: koliduje z platformami i wrogami.
+# Nie koliduje z: graczem i monetami.
 # =============================================================================
 
 extends RigidBody2D
 
-# =============================================================================
-# KONFIGURACJA KOLIZJI
-# =============================================================================
-# collision_layer = 8 (bit 4 - warstwa 4) - Pocisk znajduje się na warstwie 4
-# collision_mask = 5 (bity 1,3 - warstwy 1 i 3) - Pocisk koliduje z:
-#   - Warstwa 1: Platform (platformy, podłoża)
-#   - Warstwa 3: Enemy (roboty - główny cel)
-# NIE koliduje z:
-#   - Warstwa 2: Player (gracz który wystrzelił pocisk)
-#   - Warstwa 5: Collectible (monety)
 
 # =============================================================================
-# PARAMETRY POCISKU
+# PARAMETRY
 # =============================================================================
 
-# Prędkość pozioma pocisku (piksele na sekundę).
-@export var speed: float = 2500.0
+@export var speed: float = 2500.0              # Prędkość lotu (piksele/s).
+@export var gravity_scale_value: float = 1.0   # Siła grawitacji (łuk trajektorii).
+@export var lifetime: float = 5.0              # Auto-zniszczenie po X sekundach.
 
-# Siła grawitacji działająca na pocisk (łuk trajektorii).
-@export var gravity_scale_value: float = 1.0
+var direction: int = 1  # 1 = prawo, -1 = lewo.
 
-# Czas życia pocisku w sekundach (auto-niszczenie jeśli nie trafi).
-@export var lifetime: float = 5.0
-
-# Kierunek lotu pocisku (1 = prawo, -1 = lewo).
-var direction: int = 1
 
 # =============================================================================
-# STATYCZNA TEKSTURA - tworzona raz i używana przez wszystkie pociski
+# TEKSTURA POCISKU (tworzona raz, współdzielona przez wszystkie pociski)
 # =============================================================================
-# Tworzenie tekstury przy każdym pocisku powodowało freeze przy pierwszym strzale.
-# Teraz tekstura jest tworzona raz (lazy loading) i cachowana.
+
 static var _cached_texture: ImageTexture = null
 
+
 # =============================================================================
-# SCENY EFEKTÓW
+# SCENY I REFERENCJE
 # =============================================================================
 
-# Efekt wybuchu - pojawia się gdy pocisk uderzy w coś.
 const ExplosionEffectScene: PackedScene = preload("res://bullet_explosion.tscn")
-
-# =============================================================================
-# REFERENCJE DO WĘZŁÓW
-# =============================================================================
 
 @onready var sprite: Sprite2D = $Sprite2D
 
 
 # =============================================================================
-# FUNKCJA _ready() - wywoływana raz, gdy pocisk jest gotowy
+# INICJALIZACJA
 # =============================================================================
+
 func _ready() -> void:
-	# Ustaw skalę grawitacji dla pocisku.
 	gravity_scale = gravity_scale_value
-
-	# Podłącz sygnał kolizji.
 	body_entered.connect(_on_body_entered)
-
-	# Stwórz jasnoszarą teksturę zamiast różowej PlaceholderTexture2D.
 	_create_bullet_texture()
 
-	# Ustaw auto-niszczenie pocisku po określonym czasie.
-	# Zapobiega gromadzeniu się pocisków które nie trafiły w nic.
+	# Auto-zniszczenie pocisku po określonym czasie.
 	var timer := Timer.new()
 	timer.wait_time = lifetime
 	timer.one_shot = true
@@ -79,28 +57,19 @@ func _ready() -> void:
 
 
 # =============================================================================
-# FUNKCJA _on_body_entered() - wywoływana gdy pocisk uderzy w coś
+# KOLIZJA - trafienie w coś
 # =============================================================================
+
 func _on_body_entered(body: Node) -> void:
-	# Sprawdź czy trafiliśmy w wroga.
 	if body.is_in_group("enemy") and body.has_method("die"):
-		# Wywołaj funkcję śmierci wroga.
 		body.die()
 
-	# Stwórz efekt wybuchu w miejscu pocisku.
 	_spawn_explosion()
-
-	# Zniszcz pocisk.
 	queue_free()
 
 
-# =============================================================================
-# FUNKCJA _spawn_explosion() - tworzy efekt wybuchu
-# =============================================================================
 func _spawn_explosion() -> void:
-	# Sprawdź czy scena wybuchu jest dostępna.
 	if not ExplosionEffectScene:
-		push_error("Bullet: ExplosionEffectScene nie jest załadowana!")
 		return
 
 	var explosion: Node2D = ExplosionEffectScene.instantiate()
@@ -109,37 +78,26 @@ func _spawn_explosion() -> void:
 
 
 # =============================================================================
-# FUNKCJA setup() - ustawia kierunek i prędkość pocisku
+# USTAWIENIE KIERUNKU (wywoływane przez gracza)
 # =============================================================================
-# Ta funkcja jest wywoływana przez gracza gdy tworzy pocisk.
+
 func setup(shoot_direction: int) -> void:
 	direction = shoot_direction
-
-	# Ustaw prędkość początkową pocisku w odpowiednim kierunku.
 	linear_velocity = Vector2(speed * direction, 0)
 
-	# Obróć sprite jeśli leci w lewo (dla spójności z resztą projektu używamy scale.x).
 	if sprite:
 		sprite.scale.x = -1.0 if direction < 0 else 1.0
 
 
 # =============================================================================
-# FUNKCJA _create_bullet_texture() - ustawia jasnoszarą teksturę pocisku
+# TEKSTURA - jasnoszary kwadrat 10x10 pikseli
 # =============================================================================
-# Używa statycznej tekstury (tworzonej tylko raz) zamiast tworzenia nowej
-# przy każdym pocisku. Rozwiązuje problem zamrożenia przy pierwszym strzale.
+
 func _create_bullet_texture() -> void:
-	# Jeśli tekstura nie została jeszcze utworzona, stwórz ją raz.
 	if _cached_texture == null:
-		# Stwórz obraz 10x10 pikseli.
 		var image: Image = Image.create(10, 10, false, Image.FORMAT_RGBA8)
-
-		# Wypełnij całą teksturę jasnoszarym kolorem.
 		image.fill(Color(0.85, 0.85, 0.85, 1.0))
-
-		# Stwórz teksturę z obrazu i zapisz ją w statycznej zmiennej.
 		_cached_texture = ImageTexture.create_from_image(image)
 
-	# Ustaw cachowaną teksturę dla sprite'a.
 	if sprite:
 		sprite.texture = _cached_texture
