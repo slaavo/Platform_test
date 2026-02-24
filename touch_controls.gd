@@ -38,7 +38,8 @@ func _setup_transparent_textures() -> void:
 
 func _create_transparent_texture(width: int, height: int) -> ImageTexture:
 	var image: Image = Image.create(width, height, false, Image.FORMAT_RGBA8)
-	image.fill(Color(1, 1, 1, 0))
+	# Lekko widoczny biały - gracz wie gdzie dotknąć.
+	image.fill(Color(1, 1, 1, 0.15))
 	return ImageTexture.create_from_image(image)
 
 

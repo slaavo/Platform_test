@@ -15,7 +15,7 @@ extends Node2D
 # SYGNAŁY
 # =============================================================================
 
-# Wysyłany gdy moneta zostanie zebrana (Main nasłuchuje i dodaje punkty).
+# Wysyłany gdy moneta zostanie zebrana (inne skrypty mogą nasłuchiwać).
 signal collected
 
 
@@ -69,6 +69,11 @@ func _on_body_entered(body: Node2D) -> void:
 		return
 
 	is_collected = true
+
+	# Dodaj punkt bezpośrednio (moneta sama zarządza swoją logiką).
+	if GameState:
+		GameState.add_points(POINTS_VALUE, "coin")
+
 	collected.emit()
 	_spawn_floating_score()
 

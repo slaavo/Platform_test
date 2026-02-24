@@ -49,15 +49,28 @@ var death_smoke: GPUParticles2D = null
 
 
 # =============================================================================
+# STANY ROBOTA
+# =============================================================================
+# enum = lista nazwanych stanów (zamiast wielu osobnych flag true/false).
+# Robot jest ZAWSZE w dokładnie jednym stanie.
+
+enum State {
+	WAITING,     # Czeka na inicjalizację (1 klatka).
+	PATROLLING,  # Normalny ruch: chodzi tam i z powrotem.
+	DYING,       # Animacja zniszczenia trwa.
+	DEAD,        # Martwy - tylko spada pod wpływem grawitacji.
+}
+
+var state: State = State.WAITING
+
+
+# =============================================================================
 # ZMIENNE WEWNĘTRZNE
 # =============================================================================
 
 var direction: int = 1           # 1 = prawo, -1 = lewo.
 var left_bound: float = 0.0     # Lewa granica ruchu.
 var right_bound: float = 0.0    # Prawa granica ruchu.
-var is_ready: bool = false       # Czy robot jest gotowy do ruchu?
-var is_dying: bool = false       # Czy robot umiera (animacja trwa)?
-var is_dead: bool = false        # Czy robot jest martwy (animacja skończona)?
 
 
 # =============================================================================
@@ -121,7 +134,7 @@ func _setup_bounds() -> void:
 	var robot_half_height: float = robot_size.y / 2.0
 	global_position = Vector2(center_x, platform.global_position.y - robot_half_height)
 
-	is_ready = true
+	state = State.PATROLLING
 
 
 # =============================================================================
@@ -129,28 +142,28 @@ func _setup_bounds() -> void:
 # =============================================================================
 
 func _physics_process(delta: float) -> void:
-	if not is_ready:
-		return
+	match state:
+		State.WAITING:
+			return
 
-	# Martwy robot - tylko grawitacja, bez ruchu.
-	if is_dead:
-		velocity.x = 0
-		velocity.y += GRAVITY * delta
-		move_and_slide()
-		return
+		State.DEAD:
+			# Martwy robot - tylko grawitacja, bez ruchu.
+			velocity.x = 0
+			velocity.y += GRAVITY * delta
+			move_and_slide()
 
-	# Sprawdź czy animacja śmierci się skończyła.
-	if is_dying and sprite.frame >= DEATH_FRAME:
-		_finish_death()
-		return
+		State.DYING:
+			# Sprawdź czy animacja śmierci się skończyła.
+			if sprite.frame >= DEATH_FRAME:
+				_finish_death()
 
-	# Normalny ruch: chodzenie + grawitacja.
-	velocity.x = direction * speed
-	velocity.y += GRAVITY * delta
-	move_and_slide()
-
-	_update_walk_dust()
-	_check_bounds()
+		State.PATROLLING:
+			# Normalny ruch: chodzenie + grawitacja.
+			velocity.x = direction * speed
+			velocity.y += GRAVITY * delta
+			move_and_slide()
+			_update_walk_dust()
+			_check_bounds()
 
 
 # =============================================================================
@@ -196,10 +209,10 @@ func _flip_sprite() -> void:
 
 # Wywoływana gdy robot zostanie trafiony pociskiem.
 func die() -> void:
-	if is_dying or is_dead:
+	if state == State.DYING or state == State.DEAD:
 		return
 
-	is_dying = true
+	state = State.DYING
 	remove_from_group("enemy")  # Kolizje z graczem przestają działać.
 	sprite.play("break")
 	_award_kill_points()
@@ -208,7 +221,7 @@ func die() -> void:
 
 func _finish_death() -> void:
 	sprite.pause()
-	is_dead = true
+	state = State.DEAD
 	if walk_dust:
 		walk_dust.emitting = false
 

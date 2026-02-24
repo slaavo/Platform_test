@@ -6,7 +6,6 @@
 # - Granice kamery (żeby nie pokazywała pustki poza mapą)
 # - Wykrywanie śmierci gracza (spadnięcie poza mapę)
 # - Odradzanie gracza w punkcie startowym
-# - Połączenie monet z systemem punktów
 # - Wyświetlanie wyniku na ekranie
 # =============================================================================
 
@@ -43,7 +42,6 @@ const DEATH_ZONE_MARGIN: float = 500.0
 
 func _ready() -> void:
 	_connect_game_manager()
-	_connect_coins()
 	_setup_camera_limits()
 	_save_player_spawn()
 	_update_score_display()
@@ -165,19 +163,3 @@ func _setup_camera_limits() -> void:
 		camera.limit_top = int(min_y - CAMERA_MARGIN)
 		camera.limit_right = int(max_x + CAMERA_MARGIN)
 		camera.limit_bottom = int(max_y + CAMERA_MARGIN)
-
-
-# =============================================================================
-# MONETY - podłączanie do systemu punktów
-# =============================================================================
-
-func _connect_coins() -> void:
-	var coins: Array[Node] = get_tree().get_nodes_in_group("coins")
-	for coin in coins:
-		if coin.has_signal("collected"):
-			coin.collected.connect(_on_coin_collected)
-
-
-func _on_coin_collected() -> void:
-	if GameState:
-		GameState.add_points(1, "coin")

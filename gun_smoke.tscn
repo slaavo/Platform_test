@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://bq1qdi2lwqcg5"]
 
-[ext_resource type="Script" uid="uid://tkwsihdadltu" path="res://gun_smoke.gd" id="1_smoke"]
+[ext_resource type="Script" path="res://one_shot_particle.gd" id="1_smoke"]
 
 [sub_resource type="Gradient" id="Gradient_smoke"]
 offsets = PackedFloat32Array(0, 0.3, 0.7, 1)
@@ -36,3 +36,4 @@ randomness = 0.4
 fixed_fps = 120
 process_material = SubResource("ParticleProcessMaterial_smoke")
 script = ExtResource("1_smoke")
+softness = 2.0
