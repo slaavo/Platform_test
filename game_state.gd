@@ -16,6 +16,9 @@ extends Node
 # =============================================================================
 # SYGNAŁY - powiadomienia dla innych skryptów
 # =============================================================================
+# signal = sygnał, czyli sposób komunikacji między obiektami w Godot.
+# Gdy coś ważnego się wydarzy, skrypt "emituje" sygnał, a inne skrypty
+# które go nasłuchują automatycznie reagują.
 
 # Prosty sygnał dla HUD - przekazuje nowy wynik.
 signal score_changed(new_score: int)

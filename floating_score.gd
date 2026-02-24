@@ -12,15 +12,10 @@ extends Node2D
 
 
 # =============================================================================
-# REFERENCJE
+# STAŁE I REFERENCJE
 # =============================================================================
 
 @onready var label: Label = $Label
-
-
-# =============================================================================
-# STAŁE
-# =============================================================================
 
 const FONT: FontFile = preload("res://assets/fonts/BebasNeue-Regular.ttf")
 
@@ -98,8 +93,9 @@ func _start_animation() -> void:
 
 	var start_pos := global_position
 
+	# Tween = animacja płynnej zmiany wartości z punktu A do punktu B.
 	var tween := create_tween()
-	tween.set_parallel(true)
+	tween.set_parallel(true)  # Wszystkie animacje jednocześnie.
 
 	# Ruch: unoszenie w górę z lekkim łukiem na bok.
 	tween.tween_method(

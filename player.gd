@@ -8,6 +8,7 @@
 
 class_name Player
 extends CharacterBody2D
+# CharacterBody2D = postać z fizyką (kolizje, grawitacja, ruch).
 
 
 # =============================================================================
@@ -17,11 +18,14 @@ extends CharacterBody2D
 const TERMINAL_VELOCITY: float = 4000.0      # Maksymalna prędkość spadania.
 const MIN_WALK_VELOCITY: float = 50.0        # Minimalna prędkość do animacji chodu.
 const MIN_LAND_DUST_VELOCITY: float = 500.0  # Minimalna prędkość do kurzu przy lądowaniu.
+const SPRITE_SCALE: float = 0.4              # Skala (rozmiar) sprite'a gracza.
 
 
 # =============================================================================
 # SCENY EFEKTÓW I POCISKÓW
 # =============================================================================
+# preload("...") = ładuje plik (scenę, grafikę) do pamięci przy starcie gry.
+# Dzięki temu tworzenie nowych obiektów (np. pocisków) jest natychmiastowe.
 
 const SparkEffectScene: PackedScene = preload("res://spark_effect.tscn")
 const FloatingScoreScene: PackedScene = preload("res://floating_score.tscn")
@@ -54,6 +58,8 @@ const SHOOT_SCORE_OFFSET: Vector2 = Vector2(0, -40)  # Pozycja tekstu nad głow�
 # =============================================================================
 # PARAMETRY (edytowalne w Inspektorze Godot)
 # =============================================================================
+# @export = parametr widoczny i edytowalny w panelu Inspektor w edytorze Godot.
+# Można zmieniać wartości bez dotykania kodu.
 
 @export var speed: float = 600.0              # Prędkość chodzenia (piksele/s).
 @export var jump_force: float = 2200.0        # Siła skoku.
@@ -146,9 +152,9 @@ func _update_sprite_direction() -> void:
 	if sprite_container and velocity.x != 0:
 		# scale.x ujemny = odbicie lustrzane (gracz patrzy w lewo).
 		if velocity.x < 0:
-			sprite_container.scale.x = -0.4
+			sprite_container.scale.x = -SPRITE_SCALE
 		else:
-			sprite_container.scale.x = 0.4
+			sprite_container.scale.x = SPRITE_SCALE
 
 
 func _update_animation() -> void:

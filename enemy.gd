@@ -70,7 +70,8 @@ func _ready() -> void:
 	_setup_dust_effects()
 	sprite.play("run")
 
-	# Poczekaj jedną klatkę żeby platforma się zainicjalizowała.
+	# await = "poczekaj aż coś się stanie" (tu: jedna klatka, żeby platforma
+	# zdążyła się zainicjalizować zanim robot zacznie obliczać swoje granice).
 	await get_tree().process_frame
 	_setup_bounds()
 

@@ -12,10 +12,11 @@
 
 class_name Main
 extends Node2D
+# extends = ten skrypt rozszerza typ Node2D (podstawowy węzeł 2D w Godot).
 
 
 # =============================================================================
-# STAŁE
+# STAŁE - wartości które nigdy się nie zmieniają
 # =============================================================================
 
 # Dodatkowa przestrzeń wokół mapy dla kamery (w pikselach).
@@ -28,6 +29,8 @@ const DEATH_ZONE_MARGIN: float = 500.0
 # =============================================================================
 # REFERENCJE DO WĘZŁÓW
 # =============================================================================
+# @onready = zmienna ustawiana automatycznie gdy scena się załaduje.
+# $Nazwa = skrót do znalezienia węzła (elementu) w drzewie sceny po nazwie.
 
 @onready var score_label: Label = $CanvasLayer/Label
 @onready var player: CharacterBody2D = $Player

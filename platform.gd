@@ -85,17 +85,8 @@ func _get_tile_for_position(x: int, y: int) -> Vector2i:
 	var is_top: bool = (y == 0)
 	var is_bottom: bool = (y == height_tiles - 1)
 
-	# Platforma o wysokości 1 - używaj tylko górnych kafelków.
-	if height_tiles == 1:
-		if is_left:
-			return TILES["top_left"]
-		elif is_right:
-			return TILES["top_right"]
-		else:
-			return TILES["top_mid"]
-
-	# Górny rząd.
-	elif is_top:
+	# Górny rząd (dla platformy o wysokości 1 też działa poprawnie).
+	if is_top:
 		if is_left:
 			return TILES["top_left"]
 		elif is_right:

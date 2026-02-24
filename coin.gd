@@ -87,8 +87,10 @@ func _start_collect_animation() -> void:
 		return
 
 	var original_scale := sprite.scale
+
+	# Tween = animacja płynnej zmiany wartości z punktu A do punktu B.
 	var tween := create_tween()
-	tween.set_parallel(true)
+	tween.set_parallel(true)  # Wszystkie animacje jednocześnie.
 
 	# Unoszenie się w górę.
 	tween.tween_property(self, "position:y", position.y - float_height, fade_duration)

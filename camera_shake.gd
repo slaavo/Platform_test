@@ -86,8 +86,6 @@ func shake(strength: float, duration: float) -> void:
 
 	strength = clamp(strength, 0.0, 100.0)
 
-	if not is_shaking:
-		is_shaking = true
-
+	is_shaking = true
 	shake_amount = strength
 	shake_time_remaining = duration
