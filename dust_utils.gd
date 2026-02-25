@@ -165,3 +165,12 @@ static func setup_land_dust(dust_node: GPUParticles2D, dust_color: Color = COLOR
 	dust_node.explosiveness = 1.0       # Wszystkie cząsteczki naraz.
 	dust_node.local_coords = false
 	dust_node.visibility_rect = Rect2(-200, -100, 400, 200)
+
+
+# =============================================================================
+# WŁĄCZANIE/WYŁĄCZANIE KURZU PRZY CHODZENIU
+# =============================================================================
+# Wspólna logika dla gracza i wroga - włącz emisję gdy postać idzie, wyłącz gdy stoi.
+static func update_walk_dust(dust: GPUParticles2D, is_walking: bool) -> void:
+	if dust:
+		dust.emitting = is_walking

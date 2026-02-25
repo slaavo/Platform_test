@@ -16,7 +16,6 @@ extends Camera2D
 
 var shake_amount: float = 0.0          # Obecna siła trzęsienia (maleje do 0).
 var shake_time_remaining: float = 0.0  # Ile sekund zostało.
-var is_shaking: bool = false
 
 
 # =============================================================================
@@ -37,24 +36,16 @@ var vertical_pan_current: float = 0.0   # Gdzie kamera JEST teraz.
 func _process(delta: float) -> void:
 	_handle_vertical_pan(delta)
 
-	var base_offset: Vector2 = Vector2(0, vertical_pan_current)
+	# Zawsze ustawiaj bazowy offset (rozglądanie w pionie).
+	offset = Vector2(0, vertical_pan_current)
 
+	# Dodaj trzęsienie jeśli trwa.
 	if shake_time_remaining > 0:
 		shake_time_remaining -= delta
-		# Losowe przesunięcie kamery w każdą stronę.
-		var shake_offset: Vector2 = Vector2(
+		offset += Vector2(
 			randf_range(-1.0, 1.0) * shake_amount,
 			randf_range(-1.0, 1.0) * shake_amount
 		)
-		offset = base_offset + shake_offset
-
-	elif is_shaking:
-		# Trzęsienie się skończyło - wróć do normalnej pozycji.
-		offset = base_offset
-		is_shaking = false
-
-	else:
-		offset = base_offset
 
 
 # =============================================================================
@@ -86,6 +77,5 @@ func shake(strength: float, duration: float) -> void:
 
 	strength = clamp(strength, 0.0, 100.0)
 
-	is_shaking = true
 	shake_amount = strength
 	shake_time_remaining = duration

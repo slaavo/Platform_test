@@ -79,35 +79,8 @@ func _build_platform() -> void:
 
 
 # Wybiera odpowiedni kafelek (róg, krawędź lub środek) dla danej pozycji.
+# Składa klucz z dwóch części: rząd ("top"/"mid"/"bot") + kolumna ("left"/"mid"/"right").
 func _get_tile_for_position(x: int, y: int) -> Vector2i:
-	var is_left: bool = (x == 0)
-	var is_right: bool = (x == width_tiles - 1)
-	var is_top: bool = (y == 0)
-	var is_bottom: bool = (y == height_tiles - 1)
-
-	# Górny rząd (dla platformy o wysokości 1 też działa poprawnie).
-	if is_top:
-		if is_left:
-			return TILES["top_left"]
-		elif is_right:
-			return TILES["top_right"]
-		else:
-			return TILES["top_mid"]
-
-	# Dolny rząd.
-	elif is_bottom:
-		if is_left:
-			return TILES["bot_left"]
-		elif is_right:
-			return TILES["bot_right"]
-		else:
-			return TILES["bot_mid"]
-
-	# Środkowe rzędy.
-	else:
-		if is_left:
-			return TILES["mid_left"]
-		elif is_right:
-			return TILES["mid_right"]
-		else:
-			return TILES["mid_mid"]
+	var row: String = "top" if y == 0 else ("bot" if y == height_tiles - 1 else "mid")
+	var col: String = "left" if x == 0 else ("right" if x == width_tiles - 1 else "mid")
+	return TILES[row + "_" + col]

@@ -136,26 +136,17 @@ func _setup_camera_limits() -> void:
 	for tilemap in all_tilemaps:
 		var used_rect: Rect2i = tilemap.get_used_rect()
 		var tile_size: Vector2i = tilemap.tile_set.tile_size
-		var parent_position: Vector2 = tilemap.get_parent().global_position
-		var tilemap_scale: Vector2 = tilemap.get_parent().scale
+		var origin: Vector2 = tilemap.get_parent().global_position
+		var s: Vector2 = tilemap.get_parent().scale
 
-		# Przelicz pozycje kafelków na piksele.
-		var local_min_x: float = used_rect.position.x * tile_size.x * tilemap_scale.x
-		var local_min_y: float = used_rect.position.y * tile_size.y * tilemap_scale.y
-		var local_max_x: float = (used_rect.position.x + used_rect.size.x) * tile_size.x * tilemap_scale.x
-		var local_max_y: float = (used_rect.position.y + used_rect.size.y) * tile_size.y * tilemap_scale.y
+		# Przelicz kafelki na piksele (operacje wektorowe zamiast osobnych x/y).
+		var rect_start: Vector2 = Vector2(used_rect.position * tile_size) * s + origin
+		var rect_end: Vector2 = Vector2((used_rect.position + used_rect.size) * tile_size) * s + origin
 
-		# Dodaj pozycję platformy żeby uzyskać współrzędne globalne.
-		local_min_x += parent_position.x
-		local_min_y += parent_position.y
-		local_max_x += parent_position.x
-		local_max_y += parent_position.y
-
-		# Aktualizuj skrajne punkty.
-		min_x = min(min_x, local_min_x)
-		min_y = min(min_y, local_min_y)
-		max_x = max(max_x, local_max_x)
-		max_y = max(max_y, local_max_y)
+		min_x = min(min_x, rect_start.x)
+		min_y = min(min_y, rect_start.y)
+		max_x = max(max_x, rect_end.x)
+		max_y = max(max_y, rect_end.y)
 
 	# Ustaw granice kamery z marginesem.
 	if camera:

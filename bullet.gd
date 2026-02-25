@@ -48,12 +48,7 @@ func _ready() -> void:
 	_create_bullet_texture()
 
 	# Auto-zniszczenie pocisku po określonym czasie.
-	var timer := Timer.new()
-	timer.wait_time = lifetime
-	timer.one_shot = true
-	timer.timeout.connect(queue_free)
-	add_child(timer)
-	timer.start()
+	get_tree().create_timer(lifetime).timeout.connect(queue_free)
 
 
 # =============================================================================

@@ -171,15 +171,8 @@ func _physics_process(delta: float) -> void:
 # =============================================================================
 
 func _update_walk_dust() -> void:
-	if not walk_dust:
-		return
-
 	var is_walking: bool = is_on_floor() and abs(velocity.x) > MIN_WALK_VELOCITY
-
-	if is_walking and not walk_dust.emitting:
-		walk_dust.emitting = true
-	elif not is_walking and walk_dust.emitting:
-		walk_dust.emitting = false
+	DustUtils.update_walk_dust(walk_dust, is_walking)
 
 
 # =============================================================================

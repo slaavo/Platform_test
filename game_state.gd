@@ -61,11 +61,6 @@ func add_points(amount: int, source: String = "unknown") -> void:
 	points_changed.emit(amount, score, source)
 
 
-# Odejmuje punkty (skrót do add_points z ujemną wartością).
-func remove_points(amount: int, source: String = "unknown") -> void:
-	add_points(-amount, source)
-
-
 # Resetuje wynik do wartości początkowej.
 func reset_score() -> void:
 	score = STARTING_SCORE
