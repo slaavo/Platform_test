@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://bvqm8xwxwqb"]
 
-[ext_resource type="Script" uid="uid://61ri5jjv46vj" path="res://bullet_explosion.gd" id="1_explosion"]
+[ext_resource type="Script" path="res://one_shot_particle.gd" id="1_explosion"]
 
 [sub_resource type="Gradient" id="Gradient_explosion"]
 offsets = PackedFloat32Array(0, 0.3, 0.7, 1)
@@ -36,3 +36,4 @@ randomness = 0.5
 fixed_fps = 120
 process_material = SubResource("ParticleProcessMaterial_explosion")
 script = ExtResource("1_explosion")
+softness = 1.5

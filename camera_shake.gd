@@ -1,156 +1,81 @@
 # =============================================================================
-# CAMERA_SHAKE.GD - KAMERA Z EFEKTEM TRZĘSIENIA I ROZGLĄDANIA
+# CAMERA_SHAKE.GD - KAMERA Z TRZĘSIENIEM I ROZGLĄDANIEM
 # =============================================================================
-# Ten skrypt rozszerza standardową kamerę 2D o dwa efekty:
-#
-# 1. TRZĘSIENIE KAMERY (Screen Shake):
-#    Gdy gracz mocno wyląduje lub zderzy się z wrogiem, kamera się trzęsie.
-#    To popularny efekt dodający "ciężkości" do akcji w grze.
-#
-# 2. ROZGLĄDANIE SIĘ W PIONIE (Vertical Pan):
-#    Gracz może nacisnąć strzałkę w górę/dół żeby zobaczyć co jest wyżej/niżej.
-#    Przydatne w platformówkach do planowania skoków.
+# Rozszerza standardową kamerę 2D o:
+# 1. Trzęsienie (screen shake) - przy mocnym lądowaniu lub zderzeniu z wrogiem
+# 2. Rozglądanie w pionie - strzałka góra/dół przesuwa kamerę
 # =============================================================================
 
 class_name CameraShake
 extends Camera2D
-# Camera2D to kamera 2D która śledzi gracza i pokazuje fragment świata gry.
 
 
 # =============================================================================
-# ZMIENNE TRZĘSIENIA KAMERY
+# TRZĘSIENIE KAMERY
 # =============================================================================
 
-# Obecna siła trzęsienia - jak bardzo kamera się przesunie.
-# Wartość maleje z czasem aż do 0.
-var shake_amount: float = 0.0
-
-# Ile sekund zostało do końca trzęsienia.
-var shake_time_remaining: float = 0.0
-
-# Czy trzęsienie jest aktywne?
-# Zapobiega problemom gdy nowe trzęsienie zacznie się podczas starego.
-var is_shaking: bool = false
+var shake_amount: float = 0.0          # Obecna siła trzęsienia (maleje do 0).
+var shake_time_remaining: float = 0.0  # Ile sekund zostało.
 
 
 # =============================================================================
-# ZMIENNE PIONOWEGO PRZESUNIĘCIA KAMERY (LOOK UP/DOWN)
+# ROZGLĄDANIE W PIONIE (strzałka góra/dół)
 # =============================================================================
-# Te parametry kontrolują jak daleko i jak szybko gracz może patrzeć w górę/dół.
 
-# Maksymalne przesunięcie w pionie (w pikselach).
-# Dla ekranu 1080p, 324px to około 30% wysokości ekranu.
-@export var vertical_pan_max: float = 324.0
+@export var vertical_pan_max: float = 324.0    # Max przesunięcie (piksele).
+@export var vertical_pan_speed: float = 3.0    # Szybkość przejścia kamery.
 
-# Szybkość płynnego przejścia kamery.
-# Wyższa wartość = szybsza reakcja kamery.
-@export var vertical_pan_speed: float = 3.0
-
-# Docelowe przesunięcie pionowe (gdzie kamera CHCE być).
-var vertical_pan_target: float = 0.0
-
-# Obecne przesunięcie pionowe (gdzie kamera JEST teraz).
-# Interpolowane płynnie w kierunku vertical_pan_target.
-var vertical_pan_current: float = 0.0
+var vertical_pan_target: float = 0.0    # Gdzie kamera CHCE być.
+var vertical_pan_current: float = 0.0   # Gdzie kamera JEST teraz.
 
 
 # =============================================================================
-# FUNKCJA _process() - wywoływana co klatkę
+# GŁÓWNA PĘTLA
 # =============================================================================
-# Obsługuje oba efekty: rozglądanie i trzęsienie.
+
 func _process(delta: float) -> void:
-	# === OBSŁUGA ROZGLĄDANIA SIĘ W PIONIE ===
 	_handle_vertical_pan(delta)
 
-	# Oblicz bazowy offset kamery (tylko z rozglądania, bez trzęsienia).
-	var base_offset: Vector2 = Vector2(0, vertical_pan_current)
+	# Zawsze ustawiaj bazowy offset (rozglądanie w pionie).
+	offset = Vector2(0, vertical_pan_current)
 
-	# === OBSŁUGA TRZĘSIENIA ===
+	# Dodaj trzęsienie jeśli trwa.
 	if shake_time_remaining > 0:
-		# Zmniejsz pozostały czas trzęsienia.
 		shake_time_remaining -= delta
-
-		# Wygeneruj losowe przesunięcie kamery.
-		# randf_range(-1.0, 1.0) zwraca losową wartość między -1 a 1.
-		var shake_offset: Vector2 = Vector2(
-			randf_range(-1.0, 1.0) * shake_amount,  # Losowe przesunięcie X.
-			randf_range(-1.0, 1.0) * shake_amount   # Losowe przesunięcie Y.
+		offset += Vector2(
+			randf_range(-1.0, 1.0) * shake_amount,
+			randf_range(-1.0, 1.0) * shake_amount
 		)
 
-		# Zastosuj oba offsety - bazowy (rozglądanie) + trzęsienie.
-		offset = base_offset + shake_offset
-
-	elif is_shaking:
-		# Trzęsienie właśnie się skończyło.
-		# Przywróć kamerę do normalnej pozycji (tylko z rozglądania).
-		offset = base_offset
-		is_shaking = false
-
-	else:
-		# Brak trzęsienia - użyj tylko bazowego offsetu.
-		offset = base_offset
-
 
 # =============================================================================
-# FUNKCJA _handle_vertical_pan() - obsługuje patrzenie w górę/dół
+# ROZGLĄDANIE
 # =============================================================================
+
 func _handle_vertical_pan(delta: float) -> void:
-	# === SPRAWDŹ INPUT OD GRACZA ===
-
 	if Input.is_action_pressed("ui_up"):
-		# Gracz trzyma strzałkę w górę.
-		# Kamera idzie w górę = ujemny Y (gracz widzi co jest wyżej).
-		# Gracz będzie widoczny w dolnej części ekranu (ok. 80%).
-		vertical_pan_target = -vertical_pan_max
-
+		vertical_pan_target = -vertical_pan_max  # Patrz w górę.
 	elif Input.is_action_pressed("ui_down"):
-		# Gracz trzyma strzałkę w dół.
-		# Kamera idzie w dół = dodatni Y (gracz widzi co jest niżej).
-		# Gracz będzie widoczny w górnej części ekranu (ok. 20%).
-		vertical_pan_target = vertical_pan_max
-
+		vertical_pan_target = vertical_pan_max   # Patrz w dół.
 	else:
-		# Gracz nie naciska strzałki - wróć kamerę do środka.
-		vertical_pan_target = 0.0
+		vertical_pan_target = 0.0  # Wróć do środka.
 
-	# === PŁYNNA INTERPOLACJA ===
-	# Kamera nie przeskakuje natychmiast - płynnie podąża za celem.
-
-	# exp() = funkcja wykładnicza, daje efekt "ease-out".
-	# Kamera szybko startuje, potem zwalnia (wyhamowanie).
+	# Płynna interpolacja (ease-out).
 	var lerp_factor: float = 1.0 - exp(-vertical_pan_speed * delta)
-
-	# lerp() interpoluje między obecną wartością a docelową.
-	# lerp_factor określa jak dużą część drogi pokonać w tej klatce.
 	vertical_pan_current = lerp(vertical_pan_current, vertical_pan_target, lerp_factor)
 
 
 # =============================================================================
-# FUNKCJA shake() - uruchamia trzęsienie kamery
+# URUCHAMIANIE TRZĘSIENIA (wywoływane z zewnątrz)
 # =============================================================================
-# Wywoływana z zewnątrz (np. przez skrypt gracza) gdy trzeba potrząsnąć kamerą.
-#
-# Parametry:
-#   strength - siła trzęsienia w pikselach (np. 10.0 = lekkie, 50.0 = silne)
-#   duration - czas trwania w sekundach (np. 0.3)
-#
-# Przykłady użycia:
-#   shake(15.0, 0.3)  # Lekkie trzęsienie przy lądowaniu
-#   shake(30.0, 0.5)  # Mocne trzęsienie przy kolizji z wrogiem
+
+# strength: siła w pikselach (np. 15.0 = lekkie, 50.0 = silne)
+# duration: czas trwania w sekundach
 func shake(strength: float, duration: float) -> void:
-	# Walidacja parametrów - ignoruj nieprawidłowe wartości.
 	if strength <= 0.0 or duration <= 0.0:
 		return
 
-	# Ogranicz siłę trzęsienia do rozsądnych wartości (max 100px).
-	# Zapobiega to "ucieczce" kamery poza ekran przy bardzo dużych wartościach.
 	strength = clamp(strength, 0.0, 100.0)
 
-	# Rozpocznij trzęsienie - ustaw flagę.
-	if not is_shaking:
-		is_shaking = true
-
-	# Ustaw parametry trzęsienia.
-	# Jeśli już trwa trzęsienie - te wartości je przedłużą/wzmocnią.
 	shake_amount = strength
 	shake_time_remaining = duration
