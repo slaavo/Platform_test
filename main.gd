@@ -15,14 +15,23 @@ extends Node2D
 
 
 # =============================================================================
-# STAŁE - wartości które nigdy się nie zmieniają
+# STAŁE
 # =============================================================================
 
-# Dodatkowa przestrzeń wokół mapy dla kamery (w pikselach).
-const CAMERA_MARGIN: int = 5
+const CAMERA_MARGIN: int = 5          # Dodatkowa przestrzeń wokół mapy dla kamery (piksele).
+const DEATH_ZONE_MARGIN: float = 500.0  # Jak daleko pod mapą gracz musi spaść, żeby zostać odrodzony.
 
-# Jak daleko pod mapą gracz musi spaść, żeby zostać odrodzony.
-const DEATH_ZONE_MARGIN: float = 500.0
+
+# =============================================================================
+# SCENY EFEKTÓW (do rozgrzewki shaderów przy starcie gry)
+# =============================================================================
+# preload() ładuje sceny do pamięci od razu - bez opóźnień przy tworzeniu.
+
+const MuzzleFlashScene: PackedScene = preload("res://muzzle_flash.tscn")
+const GunSmokeScene: PackedScene = preload("res://gun_smoke.tscn")
+const BulletExplosionScene: PackedScene = preload("res://bullet_explosion.tscn")
+const SparkEffectScene: PackedScene = preload("res://spark_effect.tscn")
+const BulletScene: PackedScene = preload("res://bullet.tscn")
 
 
 # =============================================================================
@@ -45,6 +54,7 @@ func _ready() -> void:
 	_setup_camera_limits()
 	_save_player_spawn()
 	_update_score_display()
+	_warmup_shaders()
 
 
 # Co klatkę fizyki - sprawdź czy gracz nie spadł poza mapę.
@@ -153,3 +163,53 @@ func _setup_camera_limits() -> void:
 		camera.limit_top = int(min_y - CAMERA_MARGIN)
 		camera.limit_right = int(max_x + CAMERA_MARGIN)
 		camera.limit_bottom = int(max_y + CAMERA_MARGIN)
+
+
+# =============================================================================
+# ROZGRZEWKA SHADERÓW - eliminacja przycięcia przy pierwszym strzale
+# =============================================================================
+# Godot 4 kompiluje shadery GPU dopiero przy PIERWSZYM renderowaniu
+# cząsteczek. Gdy gracz strzeli po raz pierwszy, gra musi naraz skompilować
+# shadery dla: błysku z lufy, dymu, wybuchu pocisku i iskier.
+# To powoduje widoczne przycięcie (~100-300ms).
+#
+# Rozwiązanie: przy starcie gry renderujemy wszystkie typy cząsteczek
+# jako w pełni przezroczyste (alpha = 0). GPU kompiluje shadery,
+# ale gracz nic nie widzi. Po 2 klatkach usuwamy tymczasowe efekty.
+
+func _warmup_shaders() -> void:
+	# 1. Pre-cache tekstur CPU (słownik w DustUtils).
+	#    Każda miękkość tworzy inną teksturę - lepiej zrobić to raz na starcie.
+	DustUtils.create_radial_texture(0.5)   # Iskry, błysk.
+	DustUtils.create_radial_texture(1.0)   # Kurz.
+	DustUtils.create_radial_texture(1.5)   # Wybuch pocisku.
+	DustUtils.create_radial_texture(2.0)   # Dym.
+
+	# 2. Pre-cache materiału iskier (static var w SparkEffect).
+	SparkEffect._ensure_cached_resources()
+
+	# 3. Pre-cache tekstury pocisku (static var w bullet.gd).
+	var temp_bullet: Node = BulletScene.instantiate()
+	temp_bullet.visible = false
+	add_child(temp_bullet)
+	temp_bullet.queue_free()
+
+	# 4. Wyrenderuj każdy typ cząsteczek jako niewidoczny (alpha = 0).
+	#    Shader kompiluje się nawet przy pełnej przezroczystości.
+	var warmup_nodes: Array[Node] = []
+
+	for scene in [MuzzleFlashScene, GunSmokeScene, BulletExplosionScene, SparkEffectScene]:
+		var particles: GPUParticles2D = scene.instantiate()
+		particles.modulate.a = 0.0
+		particles.emitting = true
+		add_child(particles)
+		warmup_nodes.append(particles)
+
+	# 5. Poczekaj 2 klatki - GPU potrzebuje klatki na kompilację shaderów.
+	await get_tree().process_frame
+	await get_tree().process_frame
+
+	# 6. Usuń tymczasowe efekty.
+	for node in warmup_nodes:
+		if is_instance_valid(node):
+			node.queue_free()
