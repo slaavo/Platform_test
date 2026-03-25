@@ -4,22 +4,39 @@
 # Żółto-pomarańczowe iskry rozlatujące się we wszystkie strony.
 # Pojawia się gdy gracz zderzy się z wrogiem.
 # Efekt jednorazowy - po zakończeniu automatycznie się usuwa.
+#
+# Materiał cząsteczek jest tworzony raz i współdzielony przez wszystkie
+# instancje (static var), bo konfiguracja jest identyczna dla każdego efektu.
 # =============================================================================
 
 class_name SparkEffect
 extends GPUParticles2D
 
 
+# Materiał i tekstura wspólne dla wszystkich iskier (tworzone raz).
+static var _cached_material: ParticleProcessMaterial = null
+static var _cached_texture: Texture2D = null
+
+
 func _ready() -> void:
-	_setup_particles()
+	_ensure_cached_resources()
+	process_material = _cached_material
+	texture = _cached_texture
 	emitting = true
 
 	# Usuń efekt gdy wszystkie cząsteczki wygasną.
 	finished.connect(queue_free)
 
 
-# Konfiguruje wygląd i zachowanie iskier.
-func _setup_particles() -> void:
+# Tworzy materiał i teksturę przy pierwszym użyciu. Kolejne instancje
+# korzystają z gotowych zasobów bez dodatkowych alokacji.
+static func _ensure_cached_resources() -> void:
+	if _cached_texture == null:
+		_cached_texture = DustUtils.create_radial_texture(0.5)  # Twarde krawędzie = efekt świecenia.
+
+	if _cached_material != null:
+		return
+
 	var spark_material: ParticleProcessMaterial = ParticleProcessMaterial.new()
 
 	# Iskry rozlatują się we wszystkie strony (360 stopni).
@@ -70,6 +87,4 @@ func _setup_particles() -> void:
 	spark_material.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
 	spark_material.emission_sphere_radius = 8.0
 
-	# Przypisz materiał i teksturę.
-	process_material = spark_material
-	texture = DustUtils.create_radial_texture(0.5)  # Twarde krawędzie = efekt świecenia.
+	_cached_material = spark_material

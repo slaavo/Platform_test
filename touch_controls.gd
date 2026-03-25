@@ -5,6 +5,7 @@
 # Na PC pozostają ukryte.
 # =============================================================================
 
+class_name TouchControls
 extends CanvasLayer
 
 

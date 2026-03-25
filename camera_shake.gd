@@ -14,8 +14,9 @@ extends Camera2D
 # TRZĘSIENIE KAMERY
 # =============================================================================
 
-var shake_amount: float = 0.0          # Obecna siła trzęsienia (maleje do 0).
+var shake_amount: float = 0.0          # Początkowa siła trzęsienia.
 var shake_time_remaining: float = 0.0  # Ile sekund zostało.
+var shake_duration: float = 0.0        # Całkowity czas trzęsienia (do obliczania wygaszania).
 
 
 # =============================================================================
@@ -39,12 +40,15 @@ func _process(delta: float) -> void:
 	# Zawsze ustawiaj bazowy offset (rozglądanie w pionie).
 	offset = Vector2(0, vertical_pan_current)
 
-	# Dodaj trzęsienie jeśli trwa.
+	# Dodaj trzęsienie jeśli trwa. Siła maleje liniowo do zera
+	# (na początku silne, pod koniec ledwo zauważalne).
 	if shake_time_remaining > 0:
 		shake_time_remaining -= delta
+		var decay: float = shake_time_remaining / shake_duration if shake_duration > 0 else 0.0
+		var current_strength: float = shake_amount * decay
 		offset += Vector2(
-			randf_range(-1.0, 1.0) * shake_amount,
-			randf_range(-1.0, 1.0) * shake_amount
+			randf_range(-1.0, 1.0) * current_strength,
+			randf_range(-1.0, 1.0) * current_strength
 		)
 
 
@@ -78,4 +82,5 @@ func shake(strength: float, duration: float) -> void:
 	strength = clamp(strength, 0.0, 100.0)
 
 	shake_amount = strength
+	shake_duration = duration
 	shake_time_remaining = duration

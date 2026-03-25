@@ -19,7 +19,8 @@ extends RigidBody2D
 @export var gravity_scale_value: float = 1.0   # Siła grawitacji (łuk trajektorii).
 @export var lifetime: float = 5.0              # Auto-zniszczenie po X sekundach.
 
-var direction: int = 1  # 1 = prawo, -1 = lewo.
+var direction: int = 1   # 1 = prawo, -1 = lewo.
+var _hit: bool = false   # Czy pocisk już w coś trafił (blokuje podwójne kolizje).
 
 
 # =============================================================================
@@ -56,6 +57,12 @@ func _ready() -> void:
 # =============================================================================
 
 func _on_body_entered(body: Node) -> void:
+	# RigidBody2D może zgłosić kolizję z kilkoma obiektami w jednej klatce
+	# (np. wróg + platforma). Flaga _hit gwarantuje jednokrotną obsługę.
+	if _hit:
+		return
+	_hit = true
+
 	if body.is_in_group("enemy") and body.has_method("die"):
 		body.die()
 
