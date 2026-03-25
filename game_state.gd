@@ -23,11 +23,7 @@ extends Node
 # Prosty sygnał dla HUD - przekazuje nowy wynik.
 signal score_changed(new_score: int)
 
-# Szczegółowy sygnał - ile punktów, nowy wynik, skąd (np. "coin", "enemy").
-signal points_changed(amount: int, new_total: int, source: String)
-
-# Sygnały o stanie gracza.
-signal player_died
+# Sygnał o odrodzeniu gracza.
 signal player_respawned
 
 
@@ -58,7 +54,6 @@ func add_points(amount: int, source: String = "unknown") -> void:
 		high_score = score
 
 	score_changed.emit(score)
-	points_changed.emit(amount, score, source)
 
 
 # Resetuje wynik do wartości początkowej.
@@ -87,10 +82,6 @@ func set_spawn_position(pos: Vector2) -> void:
 
 func get_spawn_position() -> Vector2:
 	return player_spawn_position
-
-
-func on_player_death() -> void:
-	player_died.emit()
 
 
 func on_player_respawn() -> void:

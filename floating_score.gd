@@ -49,7 +49,8 @@ func _ready() -> void:
 	_start_animation()
 
 
-# Wywoływana przez inne skrypty przed dodaniem do sceny.
+# Ustawia wartość punktów i pozycję. Musi być wywołana PRZED add_child(),
+# ponieważ _ready() korzysta z ustawionych tu wartości do animacji.
 func setup(amount: int, spawn_position: Vector2) -> void:
 	points_amount = amount
 	global_position = spawn_position

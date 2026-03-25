@@ -86,6 +86,11 @@ func _ready() -> void:
 	# await = "poczekaj aż coś się stanie" (tu: jedna klatka, żeby platforma
 	# zdążyła się zainicjalizować zanim robot zacznie obliczać swoje granice).
 	await get_tree().process_frame
+
+	# Po await robot mógł zostać usunięty (np. queue_free() w tej samej klatce).
+	if not is_inside_tree():
+		return
+
 	_setup_bounds()
 
 

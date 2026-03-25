@@ -104,16 +104,15 @@ func _setup_dust_effects() -> void:
 # =============================================================================
 
 func _physics_process(delta: float) -> void:
+	# Zapamiętaj prędkość spadania PRZED zmianami (gravity, jump, move_and_slide).
+	previous_velocity_y = velocity.y
+
 	_apply_gravity(delta)
 	_handle_movement()
 	_handle_jump()
 	_handle_shoot()
 	_update_sprite_direction()
-	_update_animation()
-	_update_walk_dust()
-
-	# Zapamiętaj prędkość spadania PRZED ruchem (move_and_slide ją zmieni).
-	previous_velocity_y = velocity.y
+	_update_walk_visuals()
 
 	move_and_slide()
 
@@ -157,19 +156,18 @@ func _update_sprite_direction() -> void:
 			sprite_container.scale.x = SPRITE_SCALE
 
 
-func _update_animation() -> void:
-	var is_running: bool = is_on_floor() and abs(velocity.x) > MIN_WALK_VELOCITY
+# Animacja i kurz zależą od tego samego warunku (postać idzie po ziemi),
+# więc są obsługiwane razem żeby uniknąć podwójnego sprawdzania.
+func _update_walk_visuals() -> void:
+	var is_walking: bool = is_on_floor() and abs(velocity.x) > MIN_WALK_VELOCITY
 
-	if is_running:
+	if is_walking:
 		if not sprite.is_playing():
 			sprite.play("walk")
 	else:
 		if sprite.is_playing():
 			sprite.pause()
 
-
-func _update_walk_dust() -> void:
-	var is_walking: bool = is_on_floor() and abs(velocity.x) > MIN_WALK_VELOCITY
 	DustUtils.update_walk_dust(walk_dust, is_walking)
 
 

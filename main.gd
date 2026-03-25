@@ -110,43 +110,42 @@ func _respawn_player() -> void:
 # =============================================================================
 
 func _setup_camera_limits() -> void:
-	# Zbierz wszystkie TileMapLayer z platform.
-	var all_tilemaps: Array[TileMapLayer] = []
-
 	var platforms_node: Node = get_node_or_null("Platforms")
 	if not platforms_node:
 		push_error("Main: Nie znaleziono węzła Platforms!")
 		return
 
-	for platform in platforms_node.get_children():
-		var tilemap: TileMapLayer = platform.get_node_or_null("TileMapLayer")
-		if tilemap:
-			all_tilemaps.append(tilemap)
-
-	if all_tilemaps.is_empty():
-		push_error("Main: Nie znaleziono żadnych TileMapLayer!")
-		return
-
-	# Znajdź skrajne punkty mapy (lewo, prawo, góra, dół).
+	# Znajdź skrajne punkty mapy (lewo, prawo, góra, dół)
+	# iterując bezpośrednio po platformach i ich TileMapLayer.
 	var min_x: float = INF
 	var min_y: float = INF
 	var max_x: float = -INF
 	var max_y: float = -INF
+	var found_any: bool = false
 
-	for tilemap in all_tilemaps:
+	for platform_node in platforms_node.get_children():
+		var tilemap: TileMapLayer = platform_node.get_node_or_null("TileMapLayer")
+		if not tilemap or not tilemap.tile_set:
+			continue
+
 		var used_rect: Rect2i = tilemap.get_used_rect()
 		var tile_size: Vector2i = tilemap.tile_set.tile_size
-		var origin: Vector2 = tilemap.get_parent().global_position
-		var s: Vector2 = tilemap.get_parent().scale
+		var origin: Vector2 = platform_node.global_position
+		var platform_scale: Vector2 = platform_node.scale
 
 		# Przelicz kafelki na piksele (operacje wektorowe zamiast osobnych x/y).
-		var rect_start: Vector2 = Vector2(used_rect.position * tile_size) * s + origin
-		var rect_end: Vector2 = Vector2((used_rect.position + used_rect.size) * tile_size) * s + origin
+		var rect_start: Vector2 = Vector2(used_rect.position * tile_size) * platform_scale + origin
+		var rect_end: Vector2 = Vector2((used_rect.position + used_rect.size) * tile_size) * platform_scale + origin
 
+		found_any = true
 		min_x = min(min_x, rect_start.x)
 		min_y = min(min_y, rect_start.y)
 		max_x = max(max_x, rect_end.x)
 		max_y = max(max_y, rect_end.y)
+
+	if not found_any:
+		push_error("Main: Nie znaleziono żadnych TileMapLayer!")
+		return
 
 	# Ustaw granice kamery z marginesem.
 	if camera:
