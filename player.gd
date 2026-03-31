@@ -28,19 +28,34 @@ const SPRITE_SCALE: float = 0.4              # Skala (rozmiar) sprite'a gracza.
 # Dzięki temu tworzenie nowych obiektów (np. pocisków) jest natychmiastowe.
 
 const SparkEffectScene: PackedScene = preload("res://spark_effect.tscn")
-const FloatingScoreScene: PackedScene = preload("res://floating_score.tscn")
 const BulletScene: PackedScene = preload("res://bullet.tscn")
 const MuzzleFlashScene: PackedScene = preload("res://muzzle_flash.tscn")
 const GunSmokeScene: PackedScene = preload("res://gun_smoke.tscn")
 
 
 # =============================================================================
-# PUNKTY
+# OBRAŻENIA OD WROGÓW
 # =============================================================================
 
-const ENEMY_COLLISION_PENALTY: int = 10   # Kara za zderzenie z wrogiem.
-const SHOOT_COST: int = 1                 # Koszt jednego strzału.
-const SHOOT_SCORE_OFFSET: Vector2 = Vector2(0, -40)  # Pozycja tekstu nad głową.
+const ENEMY_DAMAGE: int = 25              # Obrażenia HP za zderzenie z wrogiem.
+const KNOCKBACK_FORCE: float = 800.0      # Siła odskoku od wroga (piksele/s).
+const KNOCKBACK_UP_FORCE: float = -500.0  # Siła odskoku w górę (piksele/s).
+const KNOCKBACK_DURATION: float = 0.3     # Czas trwania odskoku (brak kontroli gracza).
+
+# Zdrowie gracza.
+const MAX_HEALTH: int = 100
+const STARTING_HEALTH: int = MAX_HEALTH
+
+
+# =============================================================================
+# SYGNAŁY
+# =============================================================================
+
+# Sygnał zmiany zdrowia - przekazuje aktualne HP.
+signal health_changed(new_health: int)
+
+# Sygnał śmierci gracza (HP spadło do 0).
+signal died
 
 
 # =============================================================================
@@ -69,7 +84,7 @@ const SHOOT_SCORE_OFFSET: Vector2 = Vector2(0, -40)  # Pozycja tekstu nad głow�
 @export var landing_shake_threshold: float = 2900.0  # Min. prędkość spadania do trzęsienia.
 @export var shake_strength: float = 15.0             # Siła trzęsienia.
 @export var shake_duration: float = 0.3              # Czas trwania trzęsienia (sekundy).
-@export var enemy_shake_cooldown_time: float = 0.5   # Przerwa między trzęsieniami od wrogów.
+@export var damage_cooldown_time: float = 1.0        # Przerwa między obrażeniami od wrogów.
 
 
 # =============================================================================
@@ -78,7 +93,9 @@ const SHOOT_SCORE_OFFSET: Vector2 = Vector2(0, -40)  # Pozycja tekstu nad głow�
 
 var was_in_air: bool = false          # Czy gracz był w powietrzu w poprzedniej klatce?
 var previous_velocity_y: float = 0.0  # Prędkość spadania z poprzedniej klatki.
-var enemy_shake_cooldown: float = 0.0 # Licznik cooldown trzęsienia od wrogów.
+var damage_cooldown: float = 0.0      # Licznik cooldown obrażeń od wrogów.
+var knockback_timer: float = 0.0      # Czas pozostały do końca odskoku (brak kontroli).
+var health: int = STARTING_HEALTH     # Aktualne zdrowie gracza.
 
 
 # =============================================================================
@@ -107,9 +124,16 @@ func _physics_process(delta: float) -> void:
 	# Zapamiętaj prędkość spadania PRZED zmianami (gravity, jump, move_and_slide).
 	previous_velocity_y = velocity.y
 
+	if knockback_timer > 0:
+		knockback_timer -= delta
+
 	_apply_gravity(delta)
-	_handle_movement()
-	_handle_jump()
+
+	# Podczas odskoku gracz nie może sterować postacią.
+	if knockback_timer <= 0:
+		_handle_movement()
+		_handle_jump()
+
 	_handle_shoot()
 	_update_sprite_direction()
 	_update_walk_visuals()
@@ -200,20 +224,20 @@ func _trigger_camera_shake() -> void:
 # =============================================================================
 
 func _check_enemy_collision(delta: float) -> void:
-	if enemy_shake_cooldown > 0:
-		enemy_shake_cooldown -= delta
+	if damage_cooldown > 0:
+		damage_cooldown -= delta
 
 	for i in range(get_slide_collision_count()):
 		var collision: KinematicCollision2D = get_slide_collision(i)
 		var collider: Object = collision.get_collider()
 
 		if collider and collider.is_in_group("enemy"):
-			if enemy_shake_cooldown <= 0:
+			if damage_cooldown <= 0:
 				var collision_pos: Vector2 = collision.get_position()
 				_trigger_camera_shake()
 				_spawn_sparks(collision_pos)
-				_apply_enemy_penalty(collision_pos)
-				enemy_shake_cooldown = enemy_shake_cooldown_time
+				_apply_enemy_damage(collider)
+				damage_cooldown = damage_cooldown_time
 			break
 
 
@@ -223,13 +247,46 @@ func _spawn_sparks(collision_position: Vector2) -> void:
 	get_tree().current_scene.add_child(sparks)
 
 
-func _apply_enemy_penalty(collision_position: Vector2) -> void:
-	if GameState:
-		GameState.add_points(-ENEMY_COLLISION_PENALTY, "enemy")
+func _apply_enemy_damage(enemy: Node2D) -> void:
+	take_damage(ENEMY_DAMAGE)
 
-	var floating: FloatingScore = FloatingScoreScene.instantiate()
-	floating.setup(-ENEMY_COLLISION_PENALTY, collision_position)
-	get_tree().current_scene.add_child(floating)
+	# Odskok - gracz odskakuje od wroga w przeciwną stronę.
+	var knockback_dir: float = sign(global_position.x - enemy.global_position.x)
+	if knockback_dir == 0:
+		knockback_dir = 1.0  # Domyślnie w prawo jeśli pozycje identyczne.
+	velocity.x = knockback_dir * KNOCKBACK_FORCE
+	velocity.y = KNOCKBACK_UP_FORCE
+	knockback_timer = KNOCKBACK_DURATION
+
+
+# =============================================================================
+# ZDROWIE
+# =============================================================================
+
+# Zadaje obrażenia graczowi. HP nie spadnie poniżej 0.
+func take_damage(amount: int) -> void:
+	if health <= 0:
+		return
+
+	health = maxi(0, health - amount)
+	health_changed.emit(health)
+
+	if health <= 0:
+		died.emit()
+
+
+# Leczy gracza. HP nie przekroczy MAX_HEALTH.
+func heal(amount: int) -> void:
+	health = mini(MAX_HEALTH, health + amount)
+	health_changed.emit(health)
+
+
+# Resetuje stan gracza po śmierci (zdrowie, knockback).
+func reset_health() -> void:
+	health = STARTING_HEALTH
+	knockback_timer = 0.0
+	damage_cooldown = 0.0
+	health_changed.emit(health)
 
 
 # =============================================================================
@@ -238,13 +295,6 @@ func _apply_enemy_penalty(collision_position: Vector2) -> void:
 
 func _handle_shoot() -> void:
 	if Input.is_action_just_pressed("shoot"):
-		if GameState:
-			GameState.add_points(-SHOOT_COST, "shoot")
-
-		var floating: FloatingScore = FloatingScoreScene.instantiate()
-		floating.setup(-SHOOT_COST, global_position + SHOOT_SCORE_OFFSET)
-		get_tree().current_scene.add_child(floating)
-
 		_spawn_bullet()
 		_spawn_muzzle_effects()
 

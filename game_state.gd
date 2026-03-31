@@ -16,9 +16,6 @@ extends Node
 # =============================================================================
 # SYGNAŁY - powiadomienia dla innych skryptów
 # =============================================================================
-# signal = sygnał, czyli sposób komunikacji między obiektami w Godot.
-# Gdy coś ważnego się wydarzy, skrypt "emituje" sygnał, a inne skrypty
-# które go nasłuchują automatycznie reagują.
 
 # Prosty sygnał dla HUD - przekazuje nowy wynik.
 signal score_changed(new_score: int)
@@ -46,7 +43,7 @@ var player_spawn_position: Vector2 = Vector2.ZERO
 # =============================================================================
 
 # Dodaje (lub odejmuje) punkty. Wynik nie spadnie poniżej 0.
-# source: skąd pochodzą punkty, np. "coin", "enemy", "shoot".
+# source: skąd pochodzą punkty, np. "coin", "robot_kill".
 func add_points(amount: int, source: String = "unknown") -> void:
 	score = maxi(0, score + amount)
 
