@@ -64,7 +64,9 @@ func _on_body_entered(body: Node) -> void:
 	_hit = true
 
 	if body.is_in_group("enemy") and body.has_method("die"):
-		body.die()
+		body.die(direction)
+	elif body is Enemy and body.has_method("push"):
+		body.push(direction, Enemy.KNOCKBACK_SPEED)
 
 	_spawn_explosion()
 	queue_free()

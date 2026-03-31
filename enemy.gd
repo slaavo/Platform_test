@@ -18,6 +18,9 @@ const GRAVITY: float = 980.0          # Siła grawitacji.
 const MIN_WALK_VELOCITY: float = 10.0 # Min. prędkość do efektu kurzu.
 const DEATH_FRAME: int = 28           # Klatka animacji na której robot się zatrzymuje.
 const KILL_REWARD: int = 20           # Punkty za zabicie robota.
+const KNOCKBACK_SPEED: float = 120.0    # Prędkość odrzutu po trafieniu pociskiem.
+const KNOCKBACK_FRICTION: float = 300.0  # Hamowanie odrzutu (piksele/s²).
+const PUSH_SPEED: float = 80.0          # Prędkość przepychania przez gracza.
 
 
 # =============================================================================
@@ -152,13 +155,10 @@ func _physics_process(delta: float) -> void:
 			return
 
 		State.DEAD:
-			# Martwy robot - tylko grawitacja, bez ruchu.
-			velocity.x = 0
-			velocity.y += GRAVITY * delta
-			move_and_slide()
+			_apply_dead_physics(delta)
 
 		State.DYING:
-			# Sprawdź czy animacja śmierci się skończyła.
+			_apply_dead_physics(delta)
 			if sprite.frame >= DEATH_FRAME:
 				_finish_death()
 
@@ -169,6 +169,13 @@ func _physics_process(delta: float) -> void:
 			move_and_slide()
 			_update_walk_dust()
 			_check_bounds()
+
+
+# Fizyka martwego/umierającego robota: odrzut z hamowaniem + grawitacja.
+func _apply_dead_physics(delta: float) -> void:
+	velocity.x = move_toward(velocity.x, 0.0, KNOCKBACK_FRICTION * delta)
+	velocity.y += GRAVITY * delta
+	move_and_slide()
 
 
 # =============================================================================
@@ -206,15 +213,23 @@ func _flip_sprite() -> void:
 # =============================================================================
 
 # Wywoływana gdy robot zostanie trafiony pociskiem.
-func die() -> void:
+# knockback_dir: 1 = odrzut w prawo, -1 = w lewo, 0 = brak odrzutu.
+func die(knockback_dir: int = 0) -> void:
 	if state == State.DYING or state == State.DEAD:
 		return
 
 	state = State.DYING
+	velocity.x = knockback_dir * KNOCKBACK_SPEED
+	collision_mask |= 4  # Martwy robot koliduje z innymi robotami.
 	remove_from_group("enemy")  # Kolizje z graczem przestają działać.
 	sprite.play("break")
 	_award_kill_points()
 	_create_death_smoke()
+
+
+# Odrzut martwego robota (pociskiem lub przepychanie przez gracza).
+func push(knockback_dir: int, push_speed: float = PUSH_SPEED) -> void:
+	velocity.x = knockback_dir * push_speed
 
 
 func _finish_death() -> void:
