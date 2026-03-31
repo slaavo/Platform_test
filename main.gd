@@ -41,6 +41,7 @@ const BulletScene: PackedScene = preload("res://bullet.tscn")
 # $Nazwa = skrót do znalezienia węzła (elementu) w drzewie sceny po nazwie.
 
 @onready var score_label: Label = $CanvasLayer/Label
+@onready var health_label: Label = $CanvasLayer/HealthLabel
 @onready var player: CharacterBody2D = $Player
 @onready var camera: Camera2D = $Player/Camera2D
 
@@ -54,6 +55,7 @@ func _ready() -> void:
 	_setup_camera_limits()
 	_save_player_spawn()
 	_update_score_display()
+	_update_health_display()
 	_warmup_shaders()
 
 
@@ -66,10 +68,13 @@ func _physics_process(_delta: float) -> void:
 # SYGNAŁY I WYNIK
 # =============================================================================
 
-# Podłącz się do GameState żeby reagować na zmianę wyniku.
+# Podłącz się do sygnałów wyniku (GameState) i zdrowia (Player).
 func _connect_game_manager() -> void:
 	if GameState:
 		GameState.score_changed.connect(_on_score_changed)
+	if player:
+		player.health_changed.connect(_on_health_changed)
+		player.died.connect(_on_player_died)
 
 
 func _on_score_changed(new_score: int) -> void:
@@ -80,6 +85,22 @@ func _on_score_changed(new_score: int) -> void:
 func _update_score_display() -> void:
 	if score_label and GameState:
 		score_label.text = "Score: " + str(GameState.get_score())
+
+
+func _on_health_changed(new_health: int) -> void:
+	if health_label:
+		health_label.text = "HP: " + str(new_health)
+
+
+func _update_health_display() -> void:
+	if health_label and player:
+		health_label.text = "HP: " + str(player.health)
+
+
+func _on_player_died() -> void:
+	_respawn_player()
+	if player:
+		player.reset_health()
 
 
 # =============================================================================

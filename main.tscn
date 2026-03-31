@@ -41,6 +41,15 @@ theme = SubResource("Theme_r0du0")
 text = "Score: 0"
 metadata/_edit_use_anchors_ = true
 
+[node name="HealthLabel" type="Label" parent="CanvasLayer"]
+anchors_preset = 0
+offset_left = 27.0
+offset_top = 24.0
+offset_right = 208.0
+offset_bottom = 91.0
+theme = SubResource("Theme_r0du0")
+text = "HP: 100"
+
 [node name="Player" parent="." groups=["player"] instance=ExtResource("1_glv2v")]
 position = Vector2(0, 1494)
 
