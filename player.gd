@@ -231,7 +231,10 @@ func _check_enemy_collision(delta: float) -> void:
 		var collision: KinematicCollision2D = get_slide_collision(i)
 		var collider: Object = collision.get_collider()
 
-		if collider and collider.is_in_group("enemy"):
+		if not collider:
+			continue
+
+		if collider.is_in_group("enemy"):
 			if damage_cooldown <= 0:
 				var collision_pos: Vector2 = collision.get_position()
 				_trigger_camera_shake()
@@ -239,6 +242,11 @@ func _check_enemy_collision(delta: float) -> void:
 				_apply_enemy_damage(collider)
 				damage_cooldown = damage_cooldown_time
 			break
+
+		# Przepychanie martwego robota dotykiem.
+		if collider is Enemy and collider.has_method("push"):
+			var push_dir: int = 1 if global_position.x < collider.global_position.x else -1
+			collider.push(push_dir, Enemy.PUSH_SPEED)
 
 
 func _spawn_sparks(collision_position: Vector2) -> void:
