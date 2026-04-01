@@ -23,7 +23,6 @@ signal collected
 # SCENY I STAŁE
 # =============================================================================
 
-const FloatingScoreScene: PackedScene = preload("res://floating_score.tscn")
 const POINTS_VALUE: int = 1
 
 
@@ -75,7 +74,7 @@ func _on_body_entered(body: Node2D) -> void:
 		GameState.add_points(POINTS_VALUE, "coin")
 
 	collected.emit()
-	_spawn_floating_score()
+	FloatingText.spawn(get_tree(), POINTS_VALUE, global_position)
 
 	# Wyłącz kolizje (bezpiecznie, na koniec klatki).
 	if area:
@@ -110,15 +109,3 @@ func _start_collect_animation() -> void:
 	tween.finished.connect(queue_free)
 
 
-func _spawn_floating_score() -> void:
-	if not FloatingScoreScene:
-		return
-
-	var floating: FloatingScore = FloatingScoreScene.instantiate()
-	floating.setup(POINTS_VALUE, global_position)
-
-	var scene := get_tree().current_scene
-	if scene:
-		scene.add_child(floating)
-	else:
-		get_tree().root.add_child(floating)

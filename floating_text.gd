@@ -1,13 +1,13 @@
 # =============================================================================
-# FLOATING_SCORE.GD - UNOSZĄCY SIĘ TEKST PUNKTÓW
+# FLOATING_TEXT.GD - UNOSZĄCY SIĘ TEKST NAD OBIEKTAMI
 # =============================================================================
-# Tekst "+1" lub "-10" który pojawia się nad obiektem,
+# Tekst "+1" lub "-25 HP" który pojawia się nad obiektem,
 # unosi się w górę z lekkim dryftem na bok i znika.
 #
-# Kolory: zielony = zdobyte punkty, czerwony = stracone punkty.
+# Kolory: zielony = wartości dodatnie, czerwony = wartości ujemne.
 # =============================================================================
 
-class_name FloatingScore
+class_name FloatingText
 extends Node2D
 
 
@@ -18,6 +18,7 @@ extends Node2D
 @onready var label: Label = $Label
 
 const FONT: FontFile = preload("res://assets/fonts/BebasNeue-Regular.ttf")
+const SCENE: PackedScene = preload("res://floating_text.tscn")
 
 const LIFETIME: float = 1.0          # Czas życia tekstu (sekundy).
 const RISE_HEIGHT: float = 120.0     # Jak wysoko się unosi (piksele).
@@ -25,9 +26,10 @@ const DRIFT_RANGE: float = 40.0      # Maksymalne odchylenie na bok.
 const FONT_SIZE: int = 48
 const LABEL_SCALE: Vector2 = Vector2(1.4, 0.8)  # Szerszy i niższy tekst.
 const OUTLINE_SIZE: int = 4                       # Grubość czarnej obwódki.
+const SPAWN_OFFSET_Y: float = -80.0              # Przesunięcie w górę nad obiektem.
 
-const COLOR_POSITIVE: Color = Color(0.2, 1.0, 0.3, 1.0)  # Zielony (+punkty).
-const COLOR_NEGATIVE: Color = Color(1.0, 0.3, 0.2, 1.0)  # Czerwony (-punkty).
+const COLOR_POSITIVE: Color = Color(0.2, 1.0, 0.3, 1.0)  # Zielony (+wartości).
+const COLOR_NEGATIVE: Color = Color(1.0, 0.3, 0.2, 1.0)  # Czerwony (-wartości).
 const OUTLINE_COLOR: Color = Color(0.0, 0.0, 0.0, 0.8)
 
 
@@ -36,7 +38,25 @@ const OUTLINE_COLOR: Color = Color(0.0, 0.0, 0.0, 0.8)
 # =============================================================================
 
 var drift_direction: float   # Losowy kierunek dryftu (-1 do 1).
-var points_amount: int = 0   # Wartość punktów do wyświetlenia.
+var points_amount: int = 0   # Wartość do wyświetlenia.
+var suffix: String = ""      # Opcjonalny dopisek po liczbie (np. " ♥").
+
+
+# =============================================================================
+# METODA FABRYKUJĄCA
+# =============================================================================
+
+# Tworzy i dodaje unoszący się tekst do bieżącej sceny.
+# Wywołanie: FloatingText.spawn(get_tree(), 20, global_position, " ♥")
+static func spawn(tree: SceneTree, amount: int, spawn_position: Vector2, text_suffix: String = "") -> void:
+	var instance: FloatingText = SCENE.instantiate()
+	instance._setup(amount, spawn_position + Vector2(0, SPAWN_OFFSET_Y), text_suffix)
+
+	var scene := tree.current_scene
+	if scene:
+		scene.add_child(instance)
+	else:
+		tree.root.add_child(instance)
 
 
 # =============================================================================
@@ -49,11 +69,12 @@ func _ready() -> void:
 	_start_animation()
 
 
-# Ustawia wartość punktów i pozycję. Musi być wywołana PRZED add_child(),
+# Ustawia wartość i pozycję. Musi być wywołana PRZED add_child(),
 # ponieważ _ready() korzysta z ustawionych tu wartości do animacji.
-func setup(amount: int, spawn_position: Vector2) -> void:
+func _setup(amount: int, spawn_position: Vector2, text_suffix: String = "") -> void:
 	points_amount = amount
 	global_position = spawn_position
+	suffix = text_suffix
 
 
 # =============================================================================
@@ -64,9 +85,9 @@ func _setup_label() -> void:
 	if not label:
 		return
 
-	# Tekst: "+1" lub "-10".
+	# Tekst: "+1" lub "-25 HP".
 	var prefix: String = "+" if points_amount >= 0 else ""
-	label.text = prefix + str(points_amount)
+	label.text = prefix + str(points_amount) + suffix
 
 	# Kolor zależny od znaku.
 	var text_color: Color = COLOR_POSITIVE if points_amount >= 0 else COLOR_NEGATIVE
