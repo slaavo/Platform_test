@@ -27,7 +27,6 @@ const PUSH_SPEED: float = 80.0          # Prędkość przepychania przez gracza.
 # SCENY EFEKTÓW
 # =============================================================================
 
-const FloatingScoreScene: PackedScene = preload("res://floating_score.tscn")
 const DeathSmokeScene: PackedScene = preload("res://death_smoke.tscn")
 
 
@@ -243,16 +242,7 @@ func _award_kill_points() -> void:
 	if GameState:
 		GameState.add_points(KILL_REWARD, "robot_kill")
 
-	if not FloatingScoreScene:
-		return
-
-	var current_scene: Node = get_tree().current_scene
-	if not current_scene:
-		return
-
-	var floating: FloatingScore = FloatingScoreScene.instantiate()
-	floating.setup(KILL_REWARD, global_position + Vector2(0, -80))
-	current_scene.add_child(floating)
+	FloatingText.spawn(get_tree(), KILL_REWARD, global_position)
 
 
 func _create_death_smoke() -> void:

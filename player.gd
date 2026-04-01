@@ -278,6 +278,7 @@ func take_damage(amount: int) -> void:
 
 	health = maxi(0, health - amount)
 	health_changed.emit(health)
+	FloatingText.spawn(get_tree(), -amount, global_position, " ♥")
 
 	if health <= 0:
 		died.emit()
@@ -287,6 +288,7 @@ func take_damage(amount: int) -> void:
 func heal(amount: int) -> void:
 	health = mini(MAX_HEALTH, health + amount)
 	health_changed.emit(health)
+	FloatingText.spawn(get_tree(), amount, global_position, " ♥")
 
 
 # Resetuje stan gracza po śmierci (zdrowie, knockback).
