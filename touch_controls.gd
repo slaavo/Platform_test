@@ -11,14 +11,7 @@ extends CanvasLayer
 
 func _ready() -> void:
 	_setup_transparent_textures()
-
-	var is_mobile: bool = _is_mobile_platform()
-	visible = is_mobile
-
-	if is_mobile:
-		print("TouchControls: Włączone (platforma mobilna)")
-	else:
-		print("TouchControls: Wyłączone (platforma desktop)")
+	visible = _is_mobile_platform()
 
 
 # Zamienia domyślne szaro-różowe placeholder'y na przezroczyste tekstury.

@@ -43,8 +43,7 @@ var player_spawn_position: Vector2 = Vector2.ZERO
 # =============================================================================
 
 # Dodaje (lub odejmuje) punkty. Wynik nie spadnie poniżej 0.
-# source: skąd pochodzą punkty, np. "coin", "robot_kill".
-func add_points(amount: int, source: String = "unknown") -> void:
+func add_points(amount: int) -> void:
 	score = maxi(0, score + amount)
 
 	if score > high_score:
@@ -72,8 +71,6 @@ func get_high_score() -> int:
 # =============================================================================
 
 func set_spawn_position(pos: Vector2) -> void:
-	if pos == Vector2.ZERO:
-		push_warning("GameState: set_spawn_position() z Vector2.ZERO - czy to zamierzone?")
 	player_spawn_position = pos
 
 

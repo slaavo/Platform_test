@@ -57,12 +57,8 @@ func _process(delta: float) -> void:
 # =============================================================================
 
 func _handle_vertical_pan(delta: float) -> void:
-	if Input.is_action_pressed("ui_up"):
-		vertical_pan_target = -vertical_pan_max  # Patrz w górę.
-	elif Input.is_action_pressed("ui_down"):
-		vertical_pan_target = vertical_pan_max   # Patrz w dół.
-	else:
-		vertical_pan_target = 0.0  # Wróć do środka.
+	# get_axis zwraca -1 (góra), 0 (nic) lub +1 (dół).
+	vertical_pan_target = Input.get_axis("ui_up", "ui_down") * vertical_pan_max
 
 	# Płynna interpolacja (ease-out).
 	var lerp_factor: float = 1.0 - exp(-vertical_pan_speed * delta)

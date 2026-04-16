@@ -71,7 +71,7 @@ func _on_body_entered(body: Node2D) -> void:
 
 	# Dodaj punkt bezpośrednio (moneta sama zarządza swoją logiką).
 	if GameState:
-		GameState.add_points(POINTS_VALUE, "coin")
+		GameState.add_points(POINTS_VALUE)
 
 	collected.emit()
 	FloatingText.spawn(get_tree(), POINTS_VALUE, global_position)

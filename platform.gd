@@ -21,13 +21,15 @@ extends Node2D
 @export var width_tiles: int = 3:
 	set(value):
 		width_tiles = max(1, value)
-		_build_platform()
+		if is_node_ready():
+			_build_platform()
 
 # Wysokość w kafelkach (minimum 1).
 @export var height_tiles: int = 1:
 	set(value):
 		height_tiles = max(1, value)
-		_build_platform()
+		if is_node_ready():
+			_build_platform()
 
 
 # =============================================================================
