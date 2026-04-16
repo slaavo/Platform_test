@@ -32,28 +32,29 @@ static var _texture_cache: Dictionary = {}
 # softness: jak miękko zanikają krawędzie (mała = ostre, duża = miękkie)
 # size: rozmiar tekstury w pikselach (domyślnie 32x32)
 static func create_radial_texture(softness: float = 1.0, size: int = 32) -> Texture2D:
-	# Sprawdź czy taka tekstura już istnieje w pamięci.
 	var cache_key: String = str(softness) + "_" + str(size)
 	if _texture_cache.has(cache_key):
 		return _texture_cache[cache_key]
 
-	# Stwórz pusty obraz z kanałem przezroczystości.
 	var image: Image = Image.create(size, size, false, Image.FORMAT_RGBA8)
-	var center: Vector2 = Vector2(size / 2.0, size / 2.0)
+	var center: float = size / 2.0
 	var radius: float = size / 2.0
+	var radius_sq: float = radius * radius
+	var transparent := Color(0, 0, 0, 0)
 
-	# Dla każdego piksela oblicz przezroczystość na podstawie odległości od środka.
-	for x in range(size):
-		for y in range(size):
-			var distance: float = Vector2(x + 0.5, y + 0.5).distance_to(center)
-
-			if distance <= radius:
-				# Im dalej od środka, tym bardziej przezroczysty.
-				# pow() z parametrem softness kontroluje szybkość zanikania.
-				var alpha: float = pow(1.0 - distance / radius, softness)
-				image.set_pixel(x, y, Color(1, 1, 1, alpha))
-			else:
-				image.set_pixel(x, y, Color(0, 0, 0, 0))
+	# Iterujemy row-by-row: dy liczone raz na wiersz, unikamy alokacji Vector2.
+	for y in range(size):
+		var dy: float = y + 0.5 - center
+		var dy_sq: float = dy * dy
+		for x in range(size):
+			var dx: float = x + 0.5 - center
+			var dist_sq: float = dx * dx + dy_sq
+			if dist_sq > radius_sq:
+				image.set_pixel(x, y, transparent)
+				continue
+			# pow(softness) kontroluje jak szybko zanikają krawędzie.
+			var alpha: float = pow(1.0 - sqrt(dist_sq) / radius, softness)
+			image.set_pixel(x, y, Color(1, 1, 1, alpha))
 
 	var texture: Texture2D = ImageTexture.create_from_image(image)
 	_texture_cache[cache_key] = texture

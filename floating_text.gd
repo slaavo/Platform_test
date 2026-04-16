@@ -114,29 +114,25 @@ func _start_animation() -> void:
 		return
 
 	var start_pos := global_position
+	var peak_x: float = start_pos.x + DRIFT_RANGE * drift_direction
+	var half_life: float = LIFETIME * 0.5
 
-	# Tween = animacja płynnej zmiany wartości z punktu A do punktu B.
+	# Ruch pionowy, zanikanie: jeden tween równoległy.
 	var tween := create_tween()
-	tween.set_parallel(true)  # Wszystkie animacje jednocześnie.
+	tween.set_parallel(true)
 
-	# Ruch: unoszenie w górę z lekkim łukiem na bok.
-	tween.tween_method(
-		func(progress: float) -> void:
-			# Ease-out: szybki start, wolne wyhamowanie.
-			var ease_progress: float = 1.0 - pow(1.0 - progress, 2.0)
-			var rise_offset: float = ease_progress * RISE_HEIGHT
-
-			# Łuk boczny (sin tworzy gładkie odchylenie).
-			var drift_offset: float = sin(progress * PI) * DRIFT_RANGE * drift_direction
-
-			global_position = start_pos + Vector2(drift_offset, -rise_offset),
-		0.0,
-		1.0,
-		LIFETIME
-	)
+	# Unoszenie z ease-out (quad).
+	tween.tween_property(self, "global_position:y", start_pos.y - RISE_HEIGHT, LIFETIME) \
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 	# Zanikanie w drugiej połowie czasu życia.
-	tween.tween_property(label, "modulate:a", 0.0, LIFETIME * 0.5).set_delay(LIFETIME * 0.5)
+	tween.tween_property(label, "modulate:a", 0.0, half_life).set_delay(half_life)
 
-	# Usuń po zakończeniu animacji.
 	tween.finished.connect(queue_free)
+
+	# Łuk boczny: 0 → peak → 0, sekwencyjnie, z sinusoidalnym easingiem.
+	var drift_tween := create_tween()
+	drift_tween.tween_property(self, "global_position:x", peak_x, half_life) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	drift_tween.tween_property(self, "global_position:x", start_pos.x, half_life) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
