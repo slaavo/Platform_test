@@ -50,7 +50,7 @@ func _ready() -> void:
 
 
 # Auto-zniszczenie po upływie lifetime. Licznik znika razem z pociskiem
-# po kolizji - nie zostaje żaden oczekujący callback.
+# po kolizji, więc nic nie czeka w tle na wykonanie.
 func _process(delta: float) -> void:
 	lifetime -= delta
 	if lifetime <= 0.0:

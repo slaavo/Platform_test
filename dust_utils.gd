@@ -6,7 +6,7 @@
 # - Wspólną funkcję do generowania okrągłych tekstur cząsteczek
 # - Gotowe konfiguracje kurzu (chodzenie, lądowanie)
 #
-# Użycie: DustUtils.create_radial_texture(2.0) - bez tworzenia instancji.
+# Użycie: DustUtils.create_radial_texture(2.0) - wywołanie wprost przez nazwę klasy.
 # =============================================================================
 
 class_name DustUtils
@@ -91,7 +91,6 @@ static func setup_walk_dust(dust_node: GPUParticles2D, dust_color: Color = COLOR
 	# Lekkie opadanie po chwili.
 	material.gravity = Vector3(0, 40, 0)
 
-	# Rozmiar cząsteczek.
 	material.scale_min = 0.7
 	material.scale_max = 1.2
 

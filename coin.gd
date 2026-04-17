@@ -95,16 +95,10 @@ func _start_collect_animation() -> void:
 	var tween := create_tween()
 	tween.set_parallel(true)  # Wszystkie animacje jednocześnie.
 
-	# Unoszenie się w górę.
 	tween.tween_property(self, "position:y", position.y - float_height, fade_duration)
-
-	# Zanikanie przezroczystości.
-	tween.tween_property(sprite, "modulate:a", 0.0, fade_duration)
-
-	# Powiększanie.
+	tween.tween_property(sprite, "modulate:a", 0.0, fade_duration)  # modulate:a = przezroczystość.
 	tween.tween_property(sprite, "scale", original_scale * scale_multiplier, fade_duration)
 
-	# Usuń monetę po zakończeniu animacji.
 	tween.finished.connect(queue_free)
 
 
