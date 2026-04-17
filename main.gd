@@ -199,24 +199,31 @@ func _setup_camera_limits() -> void:
 # ale gracz nic nie widzi. Po 2 klatkach usuwamy tymczasowe efekty.
 
 func _warmup_shaders() -> void:
-	# 1. Pre-cache tekstur CPU (słownik w DustUtils).
-	#    Każda miękkość tworzy inną teksturę - lepiej zrobić to raz na starcie.
+	_precache_particle_textures()
+	SparkEffect._ensure_cached_resources()
+	_precache_bullet_texture()
+	await _render_invisible_particles()
+
+
+# Każda miękkość tekstury trafia do cache raz - robimy to teraz, nie w grze.
+func _precache_particle_textures() -> void:
 	DustUtils.create_radial_texture(0.5)   # Iskry, błysk.
 	DustUtils.create_radial_texture(1.0)   # Kurz.
 	DustUtils.create_radial_texture(1.5)   # Wybuch pocisku.
 	DustUtils.create_radial_texture(2.0)   # Dym.
 
-	# 2. Pre-cache materiału iskier (static var w SparkEffect).
-	SparkEffect._ensure_cached_resources()
 
-	# 3. Pre-cache tekstury pocisku (static var w bullet.gd).
+# Instancjacja pocisku wypełnia static _cached_texture w bullet.gd.
+func _precache_bullet_texture() -> void:
 	var temp_bullet: Node = BulletScene.instantiate()
 	temp_bullet.visible = false
 	add_child(temp_bullet)
 	temp_bullet.queue_free()
 
-	# 4. Wyrenderuj każdy typ cząsteczek jako niewidoczny (alpha = 0).
-	#    Shader kompiluje się nawet przy pełnej przezroczystości.
+
+# Renderuje każdy typ cząsteczek z alpha=0 - GPU kompiluje shader,
+# ale efekt jest niewidoczny dla gracza.
+func _render_invisible_particles() -> void:
 	var warmup_nodes: Array[Node] = []
 
 	for scene in [MuzzleFlashScene, GunSmokeScene, BulletExplosionScene, SparkEffectScene]:
@@ -226,11 +233,10 @@ func _warmup_shaders() -> void:
 		add_child(particles)
 		warmup_nodes.append(particles)
 
-	# 5. Poczekaj 2 klatki - GPU potrzebuje klatki na kompilację shaderów.
+	# GPU potrzebuje klatki na kompilację shaderów.
 	await get_tree().process_frame
 	await get_tree().process_frame
 
-	# 6. Usuń tymczasowe efekty.
 	for node in warmup_nodes:
 		if is_instance_valid(node):
 			node.queue_free()

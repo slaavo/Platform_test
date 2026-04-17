@@ -80,7 +80,6 @@ var right_bound: float = 0.0    # Prawa granica ruchu.
 # =============================================================================
 
 func _ready() -> void:
-	add_to_group("enemy")
 	direction = 1 if start_moving_right else -1
 	_setup_dust_effects()
 	sprite.play("run")
@@ -108,27 +107,16 @@ func _setup_dust_effects() -> void:
 # =============================================================================
 
 func _setup_bounds() -> void:
-	if not platform:
-		push_error("Enemy: Nie przypisano platformy!")
+	var tilemap := _get_platform_tilemap()
+	if not tilemap:
 		return
 
-	var tilemap: TileMapLayer = platform.get_node_or_null("TileMapLayer")
-	if not tilemap or not tilemap.tile_set:
-		push_error("Enemy: Platforma nie ma TileMapLayer lub tile_set!")
+	var robot_size := _get_robot_size()
+	if robot_size == Vector2.ZERO:
 		return
 
-	# Oblicz szerokość platformy w pikselach.
 	var tile_size: Vector2i = tilemap.tile_set.tile_size
-	var platform_scale: Vector2 = platform.scale
-	var platform_width: float = platform.width_tiles * tile_size.x * platform_scale.x
-
-	# Oblicz rozmiar robota.
-	if not sprite or not sprite.sprite_frames:
-		push_error("Enemy: Brak sprite'a lub tekstury!")
-		return
-
-	var frame_texture: Texture2D = sprite.sprite_frames.get_frame_texture("run", 0)
-	var robot_size: Vector2 = frame_texture.get_size() * sprite_container.scale * scale
+	var platform_width: float = platform.width_tiles * tile_size.x * platform.scale.x
 	var robot_half_width: float = robot_size.x / 2.0
 	var extra_margin: float = robot_size.x / 10.0
 
@@ -138,10 +126,28 @@ func _setup_bounds() -> void:
 
 	# Ustaw robota na środku platformy.
 	var center_x: float = platform.global_position.x + platform_width / 2.0
-	var robot_half_height: float = robot_size.y / 2.0
-	global_position = Vector2(center_x, platform.global_position.y - robot_half_height)
+	global_position = Vector2(center_x, platform.global_position.y - robot_size.y / 2.0)
 
 	state = State.PATROLLING
+
+
+func _get_platform_tilemap() -> TileMapLayer:
+	if not platform:
+		push_error("Enemy: Nie przypisano platformy!")
+		return null
+	var tilemap: TileMapLayer = platform.get_node_or_null("TileMapLayer")
+	if not tilemap or not tilemap.tile_set:
+		push_error("Enemy: Platforma nie ma TileMapLayer lub tile_set!")
+		return null
+	return tilemap
+
+
+func _get_robot_size() -> Vector2:
+	if not sprite or not sprite.sprite_frames:
+		push_error("Enemy: Brak sprite'a lub tekstury!")
+		return Vector2.ZERO
+	var frame_texture: Texture2D = sprite.sprite_frames.get_frame_texture("run", 0)
+	return frame_texture.get_size() * sprite_container.scale * scale
 
 
 # =============================================================================
@@ -220,14 +226,22 @@ func die(knockback_dir: int = 0) -> void:
 	state = State.DYING
 	velocity.x = knockback_dir * KNOCKBACK_SPEED
 	collision_mask |= 4  # Martwy robot koliduje z innymi robotami.
-	remove_from_group("enemy")  # Kolizje z graczem przestają działać.
 	sprite.play("break")
 	_award_kill_points()
 	_create_death_smoke()
 
 
-# Odrzut martwego robota (pociskiem lub przepychanie przez gracza).
-func push(knockback_dir: int, push_speed: float = PUSH_SPEED) -> void:
+# Reakcja na trafienie pociskiem - zabija żywego, popycha martwego.
+func hit(knockback_dir: int) -> void:
+	match state:
+		State.WAITING, State.PATROLLING:
+			die(knockback_dir)
+		State.DYING, State.DEAD:
+			push(knockback_dir, KNOCKBACK_SPEED)
+
+
+# Odrzut robota (pociskiem lub przepychanie przez gracza).
+func push(knockback_dir: int, push_speed: float) -> void:
 	velocity.x = knockback_dir * push_speed
 
 
@@ -240,7 +254,7 @@ func _finish_death() -> void:
 
 func _award_kill_points() -> void:
 	if GameState:
-		GameState.add_points(KILL_REWARD, "robot_kill")
+		GameState.add_points(KILL_REWARD)
 
 	FloatingText.spawn(get_tree(), KILL_REWARD, global_position)
 

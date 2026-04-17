@@ -185,12 +185,11 @@ func _update_sprite_direction() -> void:
 func _update_walk_visuals() -> void:
 	var is_walking: bool = is_on_floor() and abs(velocity.x) > MIN_WALK_VELOCITY
 
+	# sprite.play("walk") jest idempotentne - nie restartuje już grającej animacji.
 	if is_walking:
-		if not sprite.is_playing():
-			sprite.play("walk")
+		sprite.play("walk")
 	else:
-		if sprite.is_playing():
-			sprite.pause()
+		sprite.pause()
 
 	DustUtils.update_walk_dust(walk_dust, is_walking)
 
@@ -229,24 +228,22 @@ func _check_enemy_collision(delta: float) -> void:
 
 	for i in range(get_slide_collision_count()):
 		var collision: KinematicCollision2D = get_slide_collision(i)
-		var collider: Object = collision.get_collider()
-
-		if not collider:
+		var enemy := collision.get_collider() as Enemy
+		if not enemy:
 			continue
 
-		if collider.is_in_group("enemy"):
+		if enemy.state == Enemy.State.PATROLLING:
 			if damage_cooldown <= 0:
-				var collision_pos: Vector2 = collision.get_position()
 				_trigger_camera_shake()
-				_spawn_sparks(collision_pos)
-				_apply_enemy_damage(collider)
+				_spawn_sparks(collision.get_position())
+				_apply_enemy_damage(enemy)
 				damage_cooldown = damage_cooldown_time
 			break
 
-		# Przepychanie martwego robota dotykiem.
-		if collider is Enemy and collider.has_method("push"):
-			var push_dir: int = 1 if global_position.x < collider.global_position.x else -1
-			collider.push(push_dir, Enemy.PUSH_SPEED)
+		# Przepychanie martwego/umierającego robota dotykiem.
+		if enemy.state == Enemy.State.DYING or enemy.state == Enemy.State.DEAD:
+			var push_dir: int = 1 if global_position.x < enemy.global_position.x else -1
+			enemy.push(push_dir, Enemy.PUSH_SPEED)
 
 
 func _spawn_sparks(collision_position: Vector2) -> void:

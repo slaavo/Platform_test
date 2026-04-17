@@ -48,8 +48,13 @@ func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 	_create_bullet_texture()
 
-	# Auto-zniszczenie pocisku po określonym czasie.
-	get_tree().create_timer(lifetime).timeout.connect(queue_free)
+
+# Auto-zniszczenie po upływie lifetime - licznik zamiast SceneTreeTimer,
+# dzięki czemu po trafieniu w coś nie zostaje oczekujący callback.
+func _process(delta: float) -> void:
+	lifetime -= delta
+	if lifetime <= 0.0:
+		queue_free()
 
 
 # =============================================================================
@@ -63,10 +68,8 @@ func _on_body_entered(body: Node) -> void:
 		return
 	_hit = true
 
-	if body.is_in_group("enemy") and body.has_method("die"):
-		body.die(direction)
-	elif body is Enemy and body.has_method("push"):
-		body.push(direction, Enemy.KNOCKBACK_SPEED)
+	if body is Enemy:
+		(body as Enemy).hit(direction)
 
 	_spawn_explosion()
 	queue_free()
