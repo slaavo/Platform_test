@@ -49,8 +49,8 @@ func _ready() -> void:
 	_create_bullet_texture()
 
 
-# Auto-zniszczenie po upływie lifetime - licznik zamiast SceneTreeTimer,
-# dzięki czemu po trafieniu w coś nie zostaje oczekujący callback.
+# Auto-zniszczenie po upływie lifetime. Licznik znika razem z pociskiem
+# po kolizji - nie zostaje żaden oczekujący callback.
 func _process(delta: float) -> void:
 	lifetime -= delta
 	if lifetime <= 0.0:

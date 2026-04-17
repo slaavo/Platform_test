@@ -147,7 +147,7 @@ func _setup_camera_limits() -> void:
 		return
 
 	# Znajdź skrajne punkty mapy (lewo, prawo, góra, dół)
-	# iterując bezpośrednio po platformach i ich TileMapLayer.
+	# przeglądając wszystkie platformy i ich TileMapLayer.
 	var min_x: float = INF
 	var min_y: float = INF
 	var max_x: float = -INF
@@ -164,7 +164,7 @@ func _setup_camera_limits() -> void:
 		var origin: Vector2 = platform_node.global_position
 		var platform_scale: Vector2 = platform_node.scale
 
-		# Przelicz kafelki na piksele (operacje wektorowe zamiast osobnych x/y).
+		# Przelicz kafelki na piksele (operacje wektorowe na Vector2).
 		var rect_start: Vector2 = Vector2(used_rect.position * tile_size) * platform_scale + origin
 		var rect_end: Vector2 = Vector2((used_rect.position + used_rect.size) * tile_size) * platform_scale + origin
 
@@ -205,7 +205,8 @@ func _warmup_shaders() -> void:
 	await _render_invisible_particles()
 
 
-# Każda miękkość tekstury trafia do cache raz - robimy to teraz, nie w grze.
+# Wypełnia cache wszystkimi wariantami miękkości tekstury cząsteczek.
+# Każda tekstura trafia do cache raz, przy starcie gry.
 func _precache_particle_textures() -> void:
 	DustUtils.create_radial_texture(0.5)   # Iskry, błysk.
 	DustUtils.create_radial_texture(1.0)   # Kurz.

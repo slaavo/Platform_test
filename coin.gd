@@ -69,7 +69,6 @@ func _on_body_entered(body: Node2D) -> void:
 
 	is_collected = true
 
-	# Dodaj punkt bezpośrednio (moneta sama zarządza swoją logiką).
 	if GameState:
 		GameState.add_points(POINTS_VALUE)
 
