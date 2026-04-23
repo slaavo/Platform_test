@@ -47,14 +47,18 @@ func _ready() -> void:
 	gravity_scale = gravity_scale_value
 	body_entered.connect(_on_body_entered)
 	_create_bullet_texture()
+	_start_lifetime_timer()
 
 
-# Auto-zniszczenie po upływie lifetime. Licznik znika razem z pociskiem
-# po kolizji, więc nic nie czeka w tle na wykonanie.
-func _process(delta: float) -> void:
-	lifetime -= delta
-	if lifetime <= 0.0:
-		queue_free()
+# Auto-zniszczenie po upływie lifetime. Timer jest dzieckiem pocisku,
+# więc znika razem z nim po kolizji (brak osieroconych callbacków).
+func _start_lifetime_timer() -> void:
+	var timer: Timer = Timer.new()
+	timer.wait_time = lifetime
+	timer.one_shot = true
+	timer.timeout.connect(queue_free)
+	add_child(timer)
+	timer.start()
 
 
 # =============================================================================

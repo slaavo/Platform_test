@@ -22,6 +22,9 @@ const KNOCKBACK_SPEED: float = 120.0    # Prędkość odrzutu po trafieniu pocis
 const KNOCKBACK_FRICTION: float = 300.0  # Hamowanie odrzutu (piksele/s²).
 const PUSH_SPEED: float = 80.0          # Prędkość przepychania przez gracza.
 
+# Warstwa kolizji dla martwych robotów (żeby zderzały się ze sobą nawzajem).
+const DEAD_ENEMY_COLLISION_LAYER: int = 1 << 2
+
 
 # =============================================================================
 # SCENY EFEKTÓW
@@ -36,7 +39,7 @@ const DeathSmokeScene: PackedScene = preload("res://death_smoke.tscn")
 
 @export var speed: float = 150.0              # Prędkość ruchu (piksele/s).
 @export var start_moving_right: bool = true   # Kierunek startowy.
-@export var platform: Node2D                  # Platforma po której chodzi robot.
+@export var platform: Platform                # Platforma po której chodzi robot.
 
 
 # =============================================================================
@@ -225,7 +228,7 @@ func die(knockback_dir: int = 0) -> void:
 
 	state = State.DYING
 	velocity.x = knockback_dir * KNOCKBACK_SPEED
-	collision_mask |= 4  # Martwy robot koliduje z innymi robotami.
+	collision_mask |= DEAD_ENEMY_COLLISION_LAYER
 	sprite.play("break")
 	_award_kill_points()
 	_create_death_smoke()
