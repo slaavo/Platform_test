@@ -31,6 +31,7 @@ const MuzzleFlashScene: PackedScene = preload("res://muzzle_flash.tscn")
 const GunSmokeScene: PackedScene = preload("res://gun_smoke.tscn")
 const BulletExplosionScene: PackedScene = preload("res://bullet_explosion.tscn")
 const SparkEffectScene: PackedScene = preload("res://spark_effect.tscn")
+const DeathSmokeScene: PackedScene = preload("res://death_smoke.tscn")
 const BulletScene: PackedScene = preload("res://bullet.tscn")
 
 
@@ -42,7 +43,7 @@ const BulletScene: PackedScene = preload("res://bullet.tscn")
 
 @onready var score_label: Label = $CanvasLayer/Label
 @onready var health_label: Label = $CanvasLayer/HealthLabel
-@onready var player: CharacterBody2D = $Player
+@onready var player: Player = $Player
 @onready var camera: Camera2D = $Player/Camera2D
 
 
@@ -228,7 +229,7 @@ func _precache_bullet_texture() -> void:
 func _render_invisible_particles() -> void:
 	var warmup_nodes: Array[Node] = []
 
-	for scene in [MuzzleFlashScene, GunSmokeScene, BulletExplosionScene, SparkEffectScene]:
+	for scene in [MuzzleFlashScene, GunSmokeScene, BulletExplosionScene, SparkEffectScene, DeathSmokeScene]:
 		var particles: GPUParticles2D = scene.instantiate()
 		particles.modulate.a = 0.0   # modulate.a = przezroczystość (0 = niewidoczne).
 		particles.emitting = true

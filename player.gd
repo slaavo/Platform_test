@@ -129,13 +129,13 @@ func _physics_process(delta: float) -> void:
 
 	_apply_gravity(delta)
 
-	# Podczas odskoku gracz nie może sterować postacią.
+	# Podczas odskoku gracz nie może sterować postacią ani kierunkiem spojrzenia.
 	if knockback_timer <= 0:
 		_handle_movement()
 		_handle_jump()
+		_handle_shoot()
+		_update_sprite_direction()
 
-	_handle_shoot()
-	_update_sprite_direction()
 	_update_walk_visuals()
 
 	move_and_slide()
@@ -252,7 +252,7 @@ func _spawn_sparks(collision_position: Vector2) -> void:
 	get_tree().current_scene.add_child(sparks)
 
 
-func _apply_enemy_damage(enemy: Node2D) -> void:
+func _apply_enemy_damage(enemy: Enemy) -> void:
 	take_damage(ENEMY_DAMAGE)
 
 	# Odskok - gracz odskakuje od wroga w przeciwną stronę.
@@ -320,8 +320,13 @@ func _spawn_muzzle_effects() -> void:
 	var muzzle_flash: GPUParticles2D = MuzzleFlashScene.instantiate()
 	muzzle_flash.global_position = muzzle_position.global_position
 
-	if sprite_container.scale.x < 0 and muzzle_flash.process_material:
-		muzzle_flash.process_material.direction.x = -1
+	# ParticleProcessMaterial jest współdzielony między instancjami sceny,
+	# więc duplikujemy go przed modyfikacją - inaczej zmiana kierunku
+	# wpłynęłaby na wszystkie aktywne błyski.
+	if muzzle_flash.process_material:
+		var flash_material: ParticleProcessMaterial = muzzle_flash.process_material.duplicate()
+		flash_material.direction.x = -1.0 if sprite_container.scale.x < 0 else 1.0
+		muzzle_flash.process_material = flash_material
 
 	get_tree().current_scene.add_child(muzzle_flash)
 
