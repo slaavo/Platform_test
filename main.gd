@@ -147,7 +147,7 @@ func _setup_camera_limits() -> void:
 		return
 
 	# Znajdź skrajne punkty mapy (lewo, prawo, góra, dół)
-	# iterując bezpośrednio po platformach i ich TileMapLayer.
+	# przeglądając wszystkie platformy i ich TileMapLayer.
 	var min_x: float = INF
 	var min_y: float = INF
 	var max_x: float = -INF
@@ -164,7 +164,7 @@ func _setup_camera_limits() -> void:
 		var origin: Vector2 = platform_node.global_position
 		var platform_scale: Vector2 = platform_node.scale
 
-		# Przelicz kafelki na piksele (operacje wektorowe zamiast osobnych x/y).
+		# Przelicz kafelki na piksele (operacje wektorowe na Vector2).
 		var rect_start: Vector2 = Vector2(used_rect.position * tile_size) * platform_scale + origin
 		var rect_end: Vector2 = Vector2((used_rect.position + used_rect.size) * tile_size) * platform_scale + origin
 
@@ -189,14 +189,15 @@ func _setup_camera_limits() -> void:
 # =============================================================================
 # ROZGRZEWKA SHADERÓW - eliminacja przycięcia przy pierwszym strzale
 # =============================================================================
-# Godot 4 kompiluje shadery GPU dopiero przy PIERWSZYM renderowaniu
-# cząsteczek. Gdy gracz strzeli po raz pierwszy, gra musi naraz skompilować
-# shadery dla: błysku z lufy, dymu, wybuchu pocisku i iskier.
+# Shader = mały program uruchamiany na karcie graficznej (GPU), który
+# rysuje cząsteczki. Godot 4 kompiluje go dopiero przy PIERWSZYM renderowaniu
+# danego efektu. Gdy gracz strzeli po raz pierwszy, gra musi naraz
+# skompilować shadery dla: błysku z lufy, dymu, wybuchu pocisku i iskier.
 # To powoduje widoczne przycięcie (~100-300ms).
 #
 # Rozwiązanie: przy starcie gry renderujemy wszystkie typy cząsteczek
-# jako w pełni przezroczyste (alpha = 0). GPU kompiluje shadery,
-# ale gracz nic nie widzi. Po 2 klatkach usuwamy tymczasowe efekty.
+# w pełni przezroczyste. Karta graficzna kompiluje shadery, ale gracz
+# nic nie widzi. Po 2 klatkach usuwamy tymczasowe efekty.
 
 func _warmup_shaders() -> void:
 	_precache_particle_textures()
@@ -205,7 +206,8 @@ func _warmup_shaders() -> void:
 	await _render_invisible_particles()
 
 
-# Każda miękkość tekstury trafia do cache raz - robimy to teraz, nie w grze.
+# Wypełnia cache wszystkimi wariantami miękkości tekstury cząsteczek.
+# Każda tekstura trafia do cache raz, przy starcie gry.
 func _precache_particle_textures() -> void:
 	DustUtils.create_radial_texture(0.5)   # Iskry, błysk.
 	DustUtils.create_radial_texture(1.0)   # Kurz.
@@ -213,7 +215,7 @@ func _precache_particle_textures() -> void:
 	DustUtils.create_radial_texture(2.0)   # Dym.
 
 
-# Instancjacja pocisku wypełnia static _cached_texture w bullet.gd.
+# Utworzenie pocisku wypełnia jego wspólną teksturę (_cached_texture w bullet.gd).
 func _precache_bullet_texture() -> void:
 	var temp_bullet: Node = BulletScene.instantiate()
 	temp_bullet.visible = false
@@ -221,19 +223,19 @@ func _precache_bullet_texture() -> void:
 	temp_bullet.queue_free()
 
 
-# Renderuje każdy typ cząsteczek z alpha=0 - GPU kompiluje shader,
-# ale efekt jest niewidoczny dla gracza.
+# Renderuje każdy typ cząsteczek w pełni przezroczyście - karta graficzna
+# kompiluje shader, ale efekt jest niewidoczny dla gracza.
 func _render_invisible_particles() -> void:
 	var warmup_nodes: Array[Node] = []
 
 	for scene in [MuzzleFlashScene, GunSmokeScene, BulletExplosionScene, SparkEffectScene]:
 		var particles: GPUParticles2D = scene.instantiate()
-		particles.modulate.a = 0.0
+		particles.modulate.a = 0.0   # modulate.a = przezroczystość (0 = niewidoczne).
 		particles.emitting = true
 		add_child(particles)
 		warmup_nodes.append(particles)
 
-	# GPU potrzebuje klatki na kompilację shaderów.
+	# Karta graficzna potrzebuje klatki na kompilację shaderów.
 	await get_tree().process_frame
 	await get_tree().process_frame
 

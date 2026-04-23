@@ -185,7 +185,7 @@ func _update_sprite_direction() -> void:
 func _update_walk_visuals() -> void:
 	var is_walking: bool = is_on_floor() and abs(velocity.x) > MIN_WALK_VELOCITY
 
-	# sprite.play("walk") jest idempotentne - nie restartuje już grającej animacji.
+	# sprite.play("walk") nie restartuje animacji jeśli już gra.
 	if is_walking:
 		sprite.play("walk")
 	else:

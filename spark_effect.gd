@@ -43,7 +43,6 @@ static func _ensure_cached_resources() -> void:
 	spark_material.direction = Vector3(0, 0, 0)
 	spark_material.spread = 180.0
 
-	# Prędkość wyrzutu iskier.
 	spark_material.initial_velocity_min = 250.0
 	spark_material.initial_velocity_max = 500.0
 
@@ -54,7 +53,6 @@ static func _ensure_cached_resources() -> void:
 	spark_material.damping_min = 100.0
 	spark_material.damping_max = 150.0
 
-	# Rozmiar iskier.
 	spark_material.scale_min = 4.0
 	spark_material.scale_max = 8.0
 

@@ -14,9 +14,9 @@ extends Camera2D
 # TRZĘSIENIE KAMERY
 # =============================================================================
 
-var shake_amount: float = 0.0          # Początkowa siła trzęsienia.
-var shake_time_remaining: float = 0.0  # Ile sekund zostało.
-var shake_duration: float = 0.0        # Całkowity czas trzęsienia (do obliczania wygaszania).
+var shake_amount: float = 0.0          # Siła w pikselach.
+var shake_time_remaining: float = 0.0
+var shake_duration: float = 0.0        # Pełny czas (potrzebny do obliczania wygaszania).
 
 
 # =============================================================================
@@ -24,7 +24,7 @@ var shake_duration: float = 0.0        # Całkowity czas trzęsienia (do oblicza
 # =============================================================================
 
 @export var vertical_pan_max: float = 324.0    # Max przesunięcie (piksele).
-@export var vertical_pan_speed: float = 3.0    # Szybkość przejścia kamery.
+@export var vertical_pan_speed: float = 3.0
 
 var vertical_pan_target: float = 0.0    # Gdzie kamera CHCE być.
 var vertical_pan_current: float = 0.0   # Gdzie kamera JEST teraz.
