@@ -87,15 +87,11 @@ func _ready() -> void:
 	_setup_dust_effects()
 	sprite.play("run")
 
-	# await = "poczekaj aż coś się stanie" (tu: jedna klatka, żeby platforma
-	# zdążyła się zainicjalizować zanim robot zacznie obliczać swoje granice).
-	await get_tree().process_frame
-
-	# Po await robot mógł zostać usunięty (np. queue_free() w tej samej klatce).
-	if not is_inside_tree():
-		return
-
-	_setup_bounds()
+	# call_deferred odracza wywołanie do końca bieżącej klatki, czyli po
+	# _ready() wszystkich węzłów - platforma będzie już zainicjalizowana.
+	# Jeśli robot zostanie zwolniony zanim odroczone wywołanie się wykona,
+	# silnik silently je odrzuci (w przeciwieństwie do await).
+	_setup_bounds.call_deferred()
 
 
 func _setup_dust_effects() -> void:

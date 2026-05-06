@@ -97,6 +97,11 @@ var damage_cooldown: float = 0.0      # Licznik cooldown obrażeń od wrogów.
 var knockback_timer: float = 0.0      # Czas pozostały do końca odskoku (brak kontroli).
 var health: int = STARTING_HEALTH     # Aktualne zdrowie gracza.
 
+# Materiały błysku z lufy - po jednym dla każdego kierunku, tworzone raz.
+# Bez cache każdy strzał alokowałby nowy ParticleProcessMaterial.
+static var _muzzle_material_left: ParticleProcessMaterial
+static var _muzzle_material_right: ParticleProcessMaterial
+
 
 # =============================================================================
 # INICJALIZACJA
@@ -242,8 +247,7 @@ func _check_enemy_collision(delta: float) -> void:
 
 		# Przepychanie martwego/umierającego robota dotykiem.
 		if enemy.state == Enemy.State.DYING or enemy.state == Enemy.State.DEAD:
-			var push_dir: int = 1 if global_position.x < enemy.global_position.x else -1
-			enemy.push(push_dir, Enemy.PUSH_SPEED)
+			enemy.push(_dir_to(enemy), Enemy.PUSH_SPEED)
 
 
 func _spawn_sparks(collision_position: Vector2) -> void:
@@ -256,12 +260,16 @@ func _apply_enemy_damage(enemy: Enemy) -> void:
 	take_damage(ENEMY_DAMAGE)
 
 	# Odskok - gracz odskakuje od wroga w przeciwną stronę.
-	var knockback_dir: float = sign(global_position.x - enemy.global_position.x)
-	if knockback_dir == 0:
-		knockback_dir = 1.0  # Domyślnie w prawo jeśli pozycje identyczne.
-	velocity.x = knockback_dir * KNOCKBACK_FORCE
+	velocity.x = -_dir_to(enemy) * KNOCKBACK_FORCE
 	velocity.y = KNOCKBACK_UP_FORCE
 	knockback_timer = KNOCKBACK_DURATION
+
+
+# Zwraca +1 jeśli `other` jest na prawo od gracza, -1 w przeciwnym razie.
+# Identyczne X traktujemy jako "po lewej" (zwrot -1) - dzięki temu odskok
+# i odpychanie mają deterministyczny kierunek bez specjalnej obsługi remisu.
+func _dir_to(other: Node2D) -> int:
+	return 1 if other.global_position.x > global_position.x else -1
 
 
 # =============================================================================
@@ -307,7 +315,7 @@ func _handle_shoot() -> void:
 
 
 func _spawn_bullet() -> void:
-	var bullet: RigidBody2D = BulletScene.instantiate()
+	var bullet: Bullet = BulletScene.instantiate()
 	var shoot_direction: int = -1 if sprite_container.scale.x < 0 else 1
 
 	bullet.global_position = muzzle_position.global_position
@@ -320,13 +328,11 @@ func _spawn_muzzle_effects() -> void:
 	var muzzle_flash: GPUParticles2D = MuzzleFlashScene.instantiate()
 	muzzle_flash.global_position = muzzle_position.global_position
 
-	# ParticleProcessMaterial jest współdzielony między instancjami sceny,
-	# więc duplikujemy go przed modyfikacją - inaczej zmiana kierunku
-	# wpłynęłaby na wszystkie aktywne błyski.
-	if muzzle_flash.process_material:
-		var flash_material: ParticleProcessMaterial = muzzle_flash.process_material.duplicate()
-		flash_material.direction.x = -1.0 if sprite_container.scale.x < 0 else 1.0
-		muzzle_flash.process_material = flash_material
+	var firing_left: bool = sprite_container.scale.x < 0
+	_ensure_muzzle_materials(muzzle_flash.process_material)
+	var cached: ParticleProcessMaterial = _muzzle_material_left if firing_left else _muzzle_material_right
+	if cached:
+		muzzle_flash.process_material = cached
 
 	get_tree().current_scene.add_child(muzzle_flash)
 
@@ -334,3 +340,14 @@ func _spawn_muzzle_effects() -> void:
 	var gun_smoke: GPUParticles2D = GunSmokeScene.instantiate()
 	gun_smoke.global_position = muzzle_position.global_position
 	get_tree().current_scene.add_child(gun_smoke)
+
+
+# Tworzy dwa pre-skierowane materiały błysku (lewy/prawy) przy pierwszym strzale.
+# Kolejne strzały korzystają z gotowych - bez alokacji.
+static func _ensure_muzzle_materials(template: ParticleProcessMaterial) -> void:
+	if _muzzle_material_right != null or template == null:
+		return
+	_muzzle_material_right = template.duplicate()
+	_muzzle_material_right.direction.x = 1.0
+	_muzzle_material_left = template.duplicate()
+	_muzzle_material_left.direction.x = -1.0

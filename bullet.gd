@@ -8,6 +8,7 @@
 # Nie koliduje z: graczem i monetami.
 # =============================================================================
 
+class_name Bullet
 extends RigidBody2D
 
 
