@@ -40,6 +40,7 @@ const OUTLINE_COLOR: Color = Color(0.0, 0.0, 0.0, 0.8)
 var drift_direction: float   # Losowy kierunek dryftu (-1 do 1).
 var points_amount: int = 0   # Wartość do wyświetlenia.
 var suffix: String = ""      # Opcjonalny dopisek po liczbie (np. " ♥").
+var _start_pos: Vector2      # Pozycja w której tekst się pojawił (baza dla animacji).
 
 
 # =============================================================================
@@ -113,30 +114,28 @@ func _start_animation() -> void:
 		queue_free()
 		return
 
-	var start_pos := global_position
+	_start_pos = global_position
 
 	# Tween = animacja płynnej zmiany wartości z punktu A do punktu B.
 	var tween := create_tween()
 	tween.set_parallel(true)  # Wszystkie animacje jednocześnie.
 
 	# Ruch: unoszenie w górę z lekkim łukiem na bok.
-	tween.tween_method(
-		func(progress: float) -> void:
-			# Ease-out: szybki start, wolne wyhamowanie.
-			var ease_progress: float = 1.0 - pow(1.0 - progress, 2.0)
-			var rise_offset: float = ease_progress * RISE_HEIGHT
-
-			# Łuk boczny (sin tworzy gładkie odchylenie).
-			var drift_offset: float = sin(progress * PI) * DRIFT_RANGE * drift_direction
-
-			global_position = start_pos + Vector2(drift_offset, -rise_offset),
-		0.0,
-		1.0,
-		LIFETIME
-	)
+	# Wydzielona metoda zamiast lambdy - czytelniej i bez przechwytywania scope.
+	tween.tween_method(_animate_position, 0.0, 1.0, LIFETIME)
 
 	# Zanikanie w drugiej połowie czasu życia.
 	tween.tween_property(label, "modulate:a", 0.0, LIFETIME * 0.5).set_delay(LIFETIME * 0.5)
 
 	# Usuń po zakończeniu animacji.
 	tween.finished.connect(queue_free)
+
+
+# Aktualizuje pozycję tekstu na podstawie postępu animacji (0.0 - 1.0).
+# Pionowo: ease-out (szybki start, wolne wyhamowanie).
+# Poziomo: półsinusoida tworzy gładki łuk w bok i z powrotem.
+func _animate_position(progress: float) -> void:
+	var ease_progress: float = 1.0 - pow(1.0 - progress, 2.0)
+	var rise_offset: float = ease_progress * RISE_HEIGHT
+	var drift_offset: float = sin(progress * PI) * DRIFT_RANGE * drift_direction
+	global_position = _start_pos + Vector2(drift_offset, -rise_offset)

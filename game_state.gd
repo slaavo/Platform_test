@@ -80,12 +80,3 @@ func get_spawn_position() -> Vector2:
 
 func on_player_respawn() -> void:
 	player_respawned.emit()
-
-
-# =============================================================================
-# RESET GRY
-# =============================================================================
-
-# Przywraca wynik do stanu początkowego (nie resetuje high_score).
-func reset_game() -> void:
-	reset_score()
