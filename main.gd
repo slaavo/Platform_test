@@ -134,7 +134,6 @@ func _respawn_player() -> void:
 
 	player.global_position = GameState.get_spawn_position()
 	player.velocity = Vector2.ZERO
-	GameState.on_player_respawn()
 
 
 # =============================================================================

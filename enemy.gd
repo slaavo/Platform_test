@@ -2,7 +2,7 @@
 # ENEMY.GD - WRÓG (ROBOT PATROLUJĄCY)
 # =============================================================================
 # Robot automatycznie chodzi po platformie w lewo i prawo.
-# Zawraca gdy dotrze do krawędzi. Gracz traci punkty przy zderzeniu z nim.
+# Zawraca gdy dotrze do krawędzi. Gracz traci HP przy zderzeniu z nim.
 # Można go zabić pociskiem - wtedy gracz dostaje punkty.
 # =============================================================================
 

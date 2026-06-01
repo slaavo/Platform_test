@@ -1,0 +1,76 @@
+# CLAUDE.md
+
+Wskazówki dla Claude Code (claude.ai/code) przy pracy z tym repozytorium.
+
+## Projekt
+
+Gra platformowa 2D ("Skok po Monety" / "Platformówka - demo") w **Godot 4.6**,
+napisana w **GDScript**. Gracz biega po platformach, zbiera monety, strzela
+do robotów i unika obrażeń. Projekt uczniowski - czytelność kodu jest
+ważniejsza niż sprytne sztuczki.
+
+Główna scena: `main.tscn`. Platformy docelowe: Windows i Android.
+
+## Uruchamianie i testowanie
+
+Nie ma testów automatycznych. Weryfikacja odbywa się przez uruchomienie gry
+w edytorze Godot (F5) lub z linii poleceń, jeśli `godot` jest dostępne:
+
+```
+godot --path . main.tscn        # uruchom grę
+godot --path . --editor         # otwórz w edytorze
+```
+
+Zmiany w kodzie sprawdzaj logicznie i przez czytanie scen `.tscn` - środowisko
+zdalne zwykle nie ma binarki Godota.
+
+## Architektura
+
+- **Autoload `GameState`** (`game_state.gd`) - singleton z wynikiem i pozycją
+  startową gracza; żyje między scenami. Komunikuje się sygnałem `score_changed`.
+- **Sygnały** do luźnego łączenia: `coin.collected`, `player.health_changed`,
+  `player.died`, `GameState.score_changed`. `main.gd` jest "reżyserem" -
+  podłącza sygnały i aktualizuje HUD (Score, HP).
+- **Grupy** do wyszukiwania obiektów: `"player"`, `"coins"`.
+- **Maszyna stanów wroga** (`enemy.gd`, enum `State`): WAITING → PATROLLING →
+  DYING → DEAD.
+- **`@tool`** w `platform.gd` - platformy budują się z kafelków na żywo w edytorze.
+
+### Warstwy kolizji (fizyka 2D)
+
+| Obiekt    | layer | mask  | Znaczenie |
+|-----------|-------|-------|-----------|
+| Platforma | 1     | -     | statyczne podłoże |
+| Gracz     | 2     | 1,3   | koliduje z platformą i wrogiem |
+| Wróg      | 3 (=4)| 1,2   | koliduje z platformą i graczem |
+| Pocisk    | 4 (=8)| 1,3   | trafia platformę i wroga |
+
+Martwy/umierający robot dodaje sobie maskę warstwy 3 (`die()` w `enemy.gd`),
+dzięki czemu martwe roboty zderzają się ze sobą. Żywe roboty się przenikają.
+
+## Konwencje kodu
+
+- **Statyczne typowanie wszędzie** - typuj zmienne, parametry i zwracane wartości.
+- **Komentarze po polsku**, tłumaczą *dlaczego*, nie tylko *co*. Pliki mają
+  nagłówek z opisem odpowiedzialności. Zachowuj ten styl i gęstość komentarzy.
+- **Małe, jednozadaniowe funkcje** z prefiksem `_` dla metod prywatnych.
+- **Stałe (`const`) i `@export`** na górze pliku; "magiczne liczby" trzymaj
+  jako nazwane stałe.
+- **Cache zasobów przez `static var`** - tekstury cząsteczek (`DustUtils`),
+  materiały (`spark_effect.gd`, błysk lufy w `player.gd`), tekstura pocisku.
+  Nie alokuj tych samych zasobów w pętli/przy każdym strzale.
+- **Współdzielone narzędzia w `dust_utils.gd`** (`class_name DustUtils`) -
+  generowanie tekstur i konfiguracja kurzu wspólna dla gracza i wroga.
+- **Rozgrzewka shaderów** w `main.gd` (`_warmup_shaders`) renderuje wszystkie
+  typy cząsteczek przezroczyście przy starcie, by uniknąć przycięcia przy
+  pierwszym efekcie. Dodając nowy efekt cząsteczkowy, dopisz go tam.
+
+## Akcje wejścia (project.godot)
+
+`ui_left`/`ui_right` (strzałki + AD), `ui_up`/`ui_down` (WS, rozglądanie kamerą),
+`ui_accept` (skok, Spacja - akcja wbudowana), `shoot` (F).
+
+## Praca z gitem
+
+Rozwój na gałęzi wskazanej w zadaniu. Commituj po polsku, zwięźle i opisowo.
+Nie twórz Pull Requestów bez wyraźnej prośby użytkownika.

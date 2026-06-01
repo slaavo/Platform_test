@@ -20,9 +20,6 @@ extends Node
 # Prosty sygnał dla HUD - przekazuje nowy wynik.
 signal score_changed(new_score: int)
 
-# Sygnał o odrodzeniu gracza.
-signal player_respawned
-
 
 # =============================================================================
 # STAN GRY
@@ -32,7 +29,6 @@ signal player_respawned
 const STARTING_SCORE: int = 100
 
 var score: int = STARTING_SCORE
-var high_score: int = STARTING_SCORE
 
 # Pozycja startowa gracza (do odradzania po śmierci).
 var player_spawn_position: Vector2 = Vector2.ZERO
@@ -45,25 +41,11 @@ var player_spawn_position: Vector2 = Vector2.ZERO
 # Dodaje (lub odejmuje) punkty. Wynik nie spadnie poniżej 0.
 func add_points(amount: int) -> void:
 	score = maxi(0, score + amount)
-
-	if score > high_score:
-		high_score = score
-
-	score_changed.emit(score)
-
-
-# Resetuje wynik do wartości początkowej.
-func reset_score() -> void:
-	score = STARTING_SCORE
 	score_changed.emit(score)
 
 
 func get_score() -> int:
 	return score
-
-
-func get_high_score() -> int:
-	return high_score
 
 
 # =============================================================================
@@ -76,7 +58,3 @@ func set_spawn_position(pos: Vector2) -> void:
 
 func get_spawn_position() -> Vector2:
 	return player_spawn_position
-
-
-func on_player_respawn() -> void:
-	player_respawned.emit()
