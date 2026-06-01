@@ -67,8 +67,8 @@ func _start_lifetime_timer() -> void:
 # =============================================================================
 
 func _on_body_entered(body: Node) -> void:
-	# RigidBody2D może zgłosić kolizję z kilkoma obiektami w jednej klatce
-	# (np. wróg + platforma). Flaga _hit gwarantuje jednokrotną obsługę.
+	# Zabezpieczenie przed podwójną obsługą: gdyby pocisk zarejestrował kolejne
+	# trafienie zanim queue_free() zdąży go usunąć, flaga _hit je zignoruje.
 	if _hit:
 		return
 	_hit = true
