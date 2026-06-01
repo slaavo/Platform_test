@@ -5,9 +5,9 @@
 # Jest Autoloadem, więc istnieje zawsze i nie znika przy zmianie scen.
 #
 # Odpowiada za:
-# - Wynik gracza (punkty)
-# - Pozycję startową gracza (do odradzania po śmierci)
-# - Wysyłanie sygnałów o ważnych wydarzeniach (zmiana wyniku, śmierć gracza)
+# - Wynik gracza (punkty) i sygnał o jego zmianie (score_changed)
+# - Wynik ostatniej rozgrywki (wygrana/przegrana) dla ekranu końcowego
+# - Reset stanu przy rozpoczęciu nowej gry
 # =============================================================================
 
 extends Node
@@ -30,8 +30,10 @@ const STARTING_SCORE: int = 100
 
 var score: int = STARTING_SCORE
 
-# Pozycja startowa gracza (do odradzania po śmierci).
-var player_spawn_position: Vector2 = Vector2.ZERO
+# Wynik ostatniej rozgrywki - decyduje, który ekran końcowy pokazać
+# (true = wygrana, false = przegrana). Ustawiany przez main.gd tuż przed
+# przejściem do end_screen.tscn.
+var last_game_won: bool = false
 
 
 # =============================================================================
@@ -49,12 +51,10 @@ func get_score() -> int:
 
 
 # =============================================================================
-# ZARZĄDZANIE GRACZEM
+# RESET NOWEJ GRY
 # =============================================================================
 
-func set_spawn_position(pos: Vector2) -> void:
-	player_spawn_position = pos
-
-
-func get_spawn_position() -> Vector2:
-	return player_spawn_position
+# Przygotowuje stan do nowej rozgrywki (start z menu lub "Zagraj ponownie").
+func reset_game() -> void:
+	score = STARTING_SCORE
+	score_changed.emit(score)
