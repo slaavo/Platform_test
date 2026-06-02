@@ -25,8 +25,8 @@ signal score_changed(new_score: int)
 # STAN GRY
 # =============================================================================
 
-# Gracz zaczyna ze 100 punktami.
-const STARTING_SCORE: int = 100
+# Gracz zaczyna z zerowym wynikiem i zdobywa punkty za monety i wrogów.
+const STARTING_SCORE: int = 0
 
 var score: int = STARTING_SCORE
 
