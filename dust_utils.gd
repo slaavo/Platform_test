@@ -25,7 +25,7 @@ extends RefCounted
 #   2.0 = miękkie krawędzie (do dymu)
 
 # Cache tekstur - każda miękkość tworzona jest tylko raz.
-static var _texture_cache: Dictionary = {}
+static var _texture_cache: Dictionary[String, Texture2D] = {}
 
 
 # Tworzy okrągłą teksturę z gradientem od białego środka do przezroczystych krawędzi.

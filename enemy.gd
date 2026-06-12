@@ -50,8 +50,6 @@ const DeathSmokeScene: PackedScene = preload("res://death_smoke.tscn")
 @onready var sprite: AnimatedSprite2D = $SpriteContainer/AnimatedSprite2D
 @onready var walk_dust: GPUParticles2D = $WalkDust
 
-var death_smoke: GPUParticles2D = null
-
 
 # =============================================================================
 # STANY ROBOTA
@@ -97,8 +95,7 @@ func _ready() -> void:
 func _setup_dust_effects() -> void:
 	if walk_dust:
 		DustUtils.setup_walk_dust(walk_dust, DustUtils.COLOR_GRAY)
-		walk_dust.amount = 20
-		walk_dust.lifetime = 1.0
+		walk_dust.lifetime = 1.0  # Dym robota utrzymuje się dłużej niż kurz gracza.
 
 
 # =============================================================================
@@ -259,8 +256,5 @@ func _award_kill_points() -> void:
 
 
 func _create_death_smoke() -> void:
-	if not DeathSmokeScene:
-		return
-
-	death_smoke = DeathSmokeScene.instantiate()
+	var death_smoke: GPUParticles2D = DeathSmokeScene.instantiate()
 	add_child(death_smoke)  # Dym jako dziecko robota - podąża za nim.

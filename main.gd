@@ -36,7 +36,6 @@ const GunSmokeScene: PackedScene = preload("res://gun_smoke.tscn")
 const BulletExplosionScene: PackedScene = preload("res://bullet_explosion.tscn")
 const SparkEffectScene: PackedScene = preload("res://spark_effect.tscn")
 const DeathSmokeScene: PackedScene = preload("res://death_smoke.tscn")
-const BulletScene: PackedScene = preload("res://bullet.tscn")
 
 
 # =============================================================================
@@ -99,9 +98,10 @@ func _on_score_changed(new_score: int) -> void:
 		score_label.text = "Score: " + str(new_score)
 
 
+# Pierwsze odświeżenie HUD przy starcie - potem aktualizują go sygnały.
 func _update_score_display() -> void:
-	if score_label and GameState:
-		score_label.text = "Score: " + str(GameState.get_score())
+	if GameState:
+		_on_score_changed(GameState.get_score())
 
 
 func _on_health_changed(new_health: int) -> void:
@@ -110,8 +110,8 @@ func _on_health_changed(new_health: int) -> void:
 
 
 func _update_health_display() -> void:
-	if health_label and player:
-		health_label.text = "HP: " + str(player.health)
+	if player:
+		_on_health_changed(player.health)
 
 
 # Utrata całego HP = przegrana.
@@ -257,12 +257,10 @@ func _precache_particle_textures() -> void:
 	DustUtils.create_radial_texture(2.0)   # Dym.
 
 
-# Utworzenie pocisku wypełnia jego wspólną teksturę (_cached_texture w bullet.gd).
+# Wypełnia wspólną teksturę pocisku (_cached_texture w bullet.gd)
+# bez tworzenia tymczasowego węzła z aktywną fizyką.
 func _precache_bullet_texture() -> void:
-	var temp_bullet: Node = BulletScene.instantiate()
-	temp_bullet.visible = false
-	add_child(temp_bullet)
-	temp_bullet.queue_free()
+	Bullet.precache_texture()
 
 
 # Renderuje każdy typ cząsteczek w pełni przezroczyście - karta graficzna

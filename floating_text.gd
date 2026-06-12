@@ -1,7 +1,7 @@
 # =============================================================================
 # FLOATING_TEXT.GD - UNOSZĄCY SIĘ TEKST NAD OBIEKTAMI
 # =============================================================================
-# Tekst "+1" lub "-25 HP" który pojawia się nad obiektem,
+# Tekst "+1" lub "-25 ♥" który pojawia się nad obiektem,
 # unosi się w górę z lekkim dryftem na bok i znika.
 #
 # Kolory: zielony = wartości dodatnie, czerwony = wartości ujemne.
@@ -86,7 +86,7 @@ func _setup_label() -> void:
 	if not label:
 		return
 
-	# Tekst: "+1" lub "-25 HP".
+	# Tekst: "+1" lub "-25 ♥".
 	var prefix: String = "+" if points_amount >= 0 else ""
 	label.text = prefix + str(points_amount) + suffix
 
