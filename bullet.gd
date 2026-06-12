@@ -17,8 +17,8 @@ extends RigidBody2D
 # =============================================================================
 
 @export var speed: float = 2500.0              # Prędkość lotu (piksele/s).
-@export var gravity_scale_value: float = 1.0   # Siła grawitacji (łuk trajektorii).
 @export var lifetime: float = 5.0              # Auto-zniszczenie po X sekundach.
+# Łuk trajektorii pochodzi z wbudowanego gravity_scale węzła RigidBody2D.
 
 var direction: int = 1   # 1 = prawo, -1 = lewo.
 var _hit: bool = false   # Czy pocisk już w coś trafił (blokuje podwójne kolizje).
@@ -27,6 +27,9 @@ var _hit: bool = false   # Czy pocisk już w coś trafił (blokuje podwójne kol
 # =============================================================================
 # TEKSTURA POCISKU (tworzona raz, współdzielona przez wszystkie pociski)
 # =============================================================================
+
+const TEXTURE_SIZE: int = 10                            # Bok kwadratu (piksele).
+const TEXTURE_COLOR: Color = Color(0.85, 0.85, 0.85)    # Jasnoszary.
 
 static var _cached_texture: ImageTexture = null
 
@@ -45,9 +48,9 @@ const ExplosionEffectScene: PackedScene = preload("res://bullet_explosion.tscn")
 # =============================================================================
 
 func _ready() -> void:
-	gravity_scale = gravity_scale_value
 	body_entered.connect(_on_body_entered)
-	_create_bullet_texture()
+	if sprite:
+		sprite.texture = _get_shared_texture()
 	_start_lifetime_timer()
 
 
@@ -102,14 +105,18 @@ func setup(shoot_direction: int) -> void:
 
 
 # =============================================================================
-# TEKSTURA - jasnoszary kwadrat 10x10 pikseli
+# TEKSTURA - jasnoszary kwadrat, tworzony raz dla wszystkich pocisków
 # =============================================================================
 
-func _create_bullet_texture() -> void:
+static func _get_shared_texture() -> ImageTexture:
 	if _cached_texture == null:
-		var image: Image = Image.create(10, 10, false, Image.FORMAT_RGBA8)
-		image.fill(Color(0.85, 0.85, 0.85, 1.0))
+		var image: Image = Image.create(TEXTURE_SIZE, TEXTURE_SIZE, false, Image.FORMAT_RGBA8)
+		image.fill(TEXTURE_COLOR)
 		_cached_texture = ImageTexture.create_from_image(image)
+	return _cached_texture
 
-	if sprite:
-		sprite.texture = _cached_texture
+
+# Wypełnia cache tekstury przy starcie gry (rozgrzewka w main.gd) -
+# bez tworzenia tymczasowego węzła z aktywną fizyką.
+static func precache_texture() -> void:
+	_get_shared_texture()

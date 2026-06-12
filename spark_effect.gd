@@ -68,14 +68,17 @@ static func _ensure_cached_resources() -> void:
 	spark_material.scale_curve = scale_curve_texture
 
 	# Zmiana koloru: żółty → pomarańczowy → czerwony → znikają.
+	# Punkty ustawiamy całymi tablicami - add_point() sortuje punkty po offsecie,
+	# więc późniejsze set_color(indeks) trafiałoby w inny punkt niż zamierzony.
 	var gradient: Gradient = Gradient.new()
-	gradient.set_offset(0, 0.0)
-	gradient.set_color(0, Color(1.0, 1.0, 0.4, 1.0))       # Jasny żółty.
-	gradient.add_point(0.2, Color(1.0, 0.8, 0.2, 1.0))     # Żółto-pomarańczowy.
-	gradient.add_point(0.5, Color(1.0, 0.5, 0.1, 0.8))     # Pomarańczowy.
-	gradient.add_point(0.75, Color(1.0, 0.3, 0.1, 0.5))    # Czerwono-pomarańczowy.
-	gradient.set_offset(1, 1.0)
-	gradient.set_color(1, Color(0.8, 0.1, 0.0, 0.0))       # Czerwony, przezroczysty.
+	gradient.offsets = PackedFloat32Array([0.0, 0.2, 0.5, 0.75, 1.0])
+	gradient.colors = PackedColorArray([
+		Color(1.0, 1.0, 0.4, 1.0),   # Jasny żółty.
+		Color(1.0, 0.8, 0.2, 1.0),   # Żółto-pomarańczowy.
+		Color(1.0, 0.5, 0.1, 0.8),   # Pomarańczowy.
+		Color(1.0, 0.3, 0.1, 0.5),   # Czerwono-pomarańczowy.
+		Color(0.8, 0.1, 0.0, 0.0),   # Czerwony, przezroczysty.
+	])
 
 	var gradient_texture: GradientTexture1D = GradientTexture1D.new()
 	gradient_texture.gradient = gradient

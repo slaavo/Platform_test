@@ -14,6 +14,8 @@ extends Camera2D
 # TRZĘSIENIE KAMERY
 # =============================================================================
 
+const MAX_SHAKE_STRENGTH: float = 100.0  # Górny limit siły - chroni przed absurdalnym trzęsieniem.
+
 var shake_amount: float = 0.0          # Siła w pikselach.
 var shake_time_remaining: float = 0.0
 var shake_duration: float = 0.0        # Pełny czas (potrzebny do obliczania wygaszania).
@@ -75,8 +77,6 @@ func shake(strength: float, duration: float) -> void:
 	if strength <= 0.0 or duration <= 0.0:
 		return
 
-	strength = clamp(strength, 0.0, 100.0)
-
-	shake_amount = strength
+	shake_amount = minf(strength, MAX_SHAKE_STRENGTH)
 	shake_duration = duration
 	shake_time_remaining = duration
