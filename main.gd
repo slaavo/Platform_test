@@ -4,8 +4,9 @@
 # "Reżyser" gry - łączy wszystkie elementy razem.
 # Odpowiada za:
 # - Granice kamery (żeby nie pokazywała pustki poza mapą)
-# - Wykrywanie śmierci gracza (spadnięcie poza mapę)
-# - Odradzanie gracza w punkcie startowym
+# - Warunek wygranej (zebranie wszystkich monet)
+# - Wykrywanie końca gry (utrata HP lub spadnięcie poza mapę) i przejście
+#   do ekranu końcowego (end_screen.tscn)
 # - Wyświetlanie wyniku na ekranie
 # =============================================================================
 
@@ -19,7 +20,10 @@ extends Node2D
 # =============================================================================
 
 const CAMERA_MARGIN: int = 5          # Dodatkowa przestrzeń wokół mapy dla kamery (piksele).
-const DEATH_ZONE_MARGIN: float = 500.0  # Jak daleko pod mapą gracz musi spaść, żeby zostać odrodzony.
+const DEATH_ZONE_MARGIN: float = 500.0  # Jak daleko pod mapą gracz musi spaść, żeby gra się skończyła.
+
+const EndScreenScene: String = "res://end_screen.tscn"  # Ekran końca gry (wygrana/przegrana).
+const END_GAME_DELAY: float = 0.6     # Krótka pauza, by gracz zobaczył ostatni efekt przed ekranem końca.
 
 
 # =============================================================================
@@ -48,13 +52,25 @@ const BulletScene: PackedScene = preload("res://bullet.tscn")
 
 
 # =============================================================================
+# STAN ROZGRYWKI
+# =============================================================================
+
+# Strażnik - ekran końca gry ma odpalić się tylko raz (śmierć i spadnięcie poza
+# mapę mogą wystąpić w tej samej klatce).
+var _game_over: bool = false
+
+# Ile monet pozostało do zebrania. Gdy spadnie do 0 - gracz wygrywa.
+var _coins_remaining: int = 0
+
+
+# =============================================================================
 # INICJALIZACJA
 # =============================================================================
 
 func _ready() -> void:
 	_connect_game_manager()
 	_setup_camera_limits()
-	_save_player_spawn()
+	_setup_win_condition()
 	_update_score_display()
 	_update_health_display()
 	_warmup_shaders()
@@ -98,42 +114,68 @@ func _update_health_display() -> void:
 		health_label.text = "HP: " + str(player.health)
 
 
+# Utrata całego HP = przegrana.
 func _on_player_died() -> void:
-	_respawn_player()
-	if player:
-		player.reset_health()
+	if GameState:
+		GameState.last_game_won = false
+	_end_game()
 
 
 # =============================================================================
-# POZYCJA STARTOWA GRACZA
+# WARUNEK WYGRANEJ - zebranie wszystkich monet
 # =============================================================================
 
-func _save_player_spawn() -> void:
-	if player and GameState:
-		GameState.set_spawn_position(player.global_position)
+# Policz monety na mapie i nasłuchuj ich zebrania. Gdy znikną wszystkie - wygrana.
+func _setup_win_condition() -> void:
+	var coins: Array[Node] = get_tree().get_nodes_in_group("coins")
+	_coins_remaining = coins.size()
+
+	for coin in coins:
+		# Sygnał coin.collected jest emitowany tuż przed animacją znikania.
+		if coin.has_signal("collected"):
+			coin.collected.connect(_on_coin_collected)
+
+
+func _on_coin_collected() -> void:
+	if _game_over:
+		return
+
+	_coins_remaining -= 1
+	if _coins_remaining <= 0:
+		if GameState:
+			GameState.last_game_won = true
+		_end_game()
 
 
 # =============================================================================
-# STREFA ŚMIERCI - odradzanie gracza po spadnięciu
+# STREFA ŚMIERCI - spadnięcie poza mapę kończy grę (przegrana)
 # =============================================================================
 
 func _check_death_zone() -> void:
-	if not player or not camera:
+	if not player or not camera or _game_over:
 		return
 
 	# Strefa śmierci = dolna granica kamery + margines.
 	var death_y: float = camera.limit_bottom + DEATH_ZONE_MARGIN
 
 	if player.global_position.y > death_y:
-		_respawn_player()
+		if GameState:
+			GameState.last_game_won = false
+		_end_game()
 
 
-func _respawn_player() -> void:
-	if not player or not GameState:
+# =============================================================================
+# KONIEC GRY - przejście do ekranu końcowego
+# =============================================================================
+
+func _end_game() -> void:
+	if _game_over:
 		return
+	_game_over = true
 
-	player.global_position = GameState.get_spawn_position()
-	player.velocity = Vector2.ZERO
+	# Krótka pauza, by gracz zobaczył ostatni efekt, zanim pojawi się ekran końca.
+	await get_tree().create_timer(END_GAME_DELAY).timeout
+	get_tree().change_scene_to_file(EndScreenScene)
 
 
 # =============================================================================
