@@ -245,9 +245,14 @@ func _check_enemy_collision(delta: float) -> void:
 				damage_cooldown = damage_cooldown_time
 			break
 
-		# Przepychanie martwego/umierającego robota dotykiem.
+		# Przepychanie martwego/umierającego robota dotykiem - tylko gdy gracz
+		# wpada na niego Z BOKU. Gdy gracz STOI na robocie, normalna kolizji jest
+		# pionowa (w górę). Bez tego warunku stanie na martwym robocie wpychałoby
+		# mu prędkość poziomą co klatkę i para gracz+robot sama by jechała.
 		if enemy.state == Enemy.State.DYING or enemy.state == Enemy.State.DEAD:
-			enemy.push(_dir_to(enemy), Enemy.PUSH_SPEED)
+			var normal: Vector2 = collision.get_normal()
+			if absf(normal.x) > absf(normal.y):
+				enemy.push(_dir_to(enemy), Enemy.PUSH_SPEED)
 
 
 func _spawn_sparks(collision_position: Vector2) -> void:
