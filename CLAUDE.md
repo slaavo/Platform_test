@@ -4,7 +4,7 @@ Wskazówki dla Claude Code (claude.ai/code) przy pracy z tym repozytorium.
 
 ## Projekt
 
-Gra platformowa 2D ("Skok po Monety" / "Platformówka - demo") w **Godot 4.6**,
+Gra platformowa 2D ("Skok po Monety" / "Platformówka - demo") w **Godot 4.7**,
 napisana w **GDScript**. Gracz biega po platformach, zbiera monety, strzela
 do robotów i unika obrażeń. Projekt uczniowski - czytelność kodu jest
 ważniejsza niż sprytne sztuczki.
@@ -103,11 +103,19 @@ Po aktywacji działają:
 
 **CI** (`.github/workflows/godot-check.yml`): przy PR i push sprawdza format/lint
 (doradczo) oraz import projektu w Godocie headless (parsowanie skryptów). Wersję
-silnika ustawia `GODOT_VERSION` (obecnie `4.6`).
+silnika ustawia `GODOT_VERSION` (obecnie `4.7`).
 
-> Godot 4.7 jest już dostępny (stabilny). Subagenci są go świadomi, ale sama
-> migracja silnika (bump `config/features` na `"4.7"`, teksty w README/CLAUDE,
-> `GODOT_VERSION` w CI) jest zaplanowana osobno — patrz plan w historii sesji.
+> Projekt działa na Godocie 4.7 (stabilny, wyd. 2026-06-18). Migracja 4.6→4.7
+> była samym bumpem wersji (`config/features` = "4.7", `GODOT_VERSION` w CI =
+> "4.7", teksty w README/CLAUDE) — 4.7 nie wprowadza zmian łamiących w API
+> używanym przez ten projekt (wejście oparte na akcjach, brak nadpisań metod z
+> nie-`void` typem zwracanym, brak setterów na polach `Packed*`, brak rysowania
+> linii 2D), więc kod rozgrywki nie wymagał zmian. Realne korzyści z 4.7 są
+> "za darmo" po bumpie: poprawka wątkowej bezpieczności interpolacji fizyki
+> (używamy `physics_interpolation` + `run_on_separate_thread`) oraz prostszy
+> eksport na Androida. Nowe API 4.7 istotne dla gry, ale opcjonalne (zmiana
+> wyglądu, nie wydajności): per-osiowa skala cząsteczek
+> `ParticleProcessMaterial.scale_3d_min/max`.
 
 ## Praca z gitem
 
