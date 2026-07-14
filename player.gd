@@ -42,6 +42,12 @@ const KNOCKBACK_FORCE: float = 800.0      # Siła odskoku od wroga (piksele/s).
 const KNOCKBACK_UP_FORCE: float = -500.0  # Siła odskoku w górę (piksele/s).
 const KNOCKBACK_DURATION: float = 0.3     # Czas trwania odskoku (brak kontroli gracza).
 
+# Minimalna pozioma składowa normalnej kolizji, żeby uznać kontakt z martwym
+# robotem za boczny (normalna ma długość 1, więc 0.9 = kontakt w ~26° od poziomu).
+# Zwykłe |x| > |y| nie wystarcza: balansując na ROGU robota gracz potrafi dostać
+# ukośną normalną z lekką przewagą poziomu i wznowić samoczynny dryf pary.
+const SIDE_PUSH_MIN_NORMAL_X: float = 0.9
+
 # Zdrowie gracza.
 const MAX_HEALTH: int = 100
 const STARTING_HEALTH: int = MAX_HEALTH
@@ -245,9 +251,18 @@ func _check_enemy_collision(delta: float) -> void:
 				damage_cooldown = damage_cooldown_time
 			break
 
-		# Przepychanie martwego/umierającego robota dotykiem.
+		# Przepychanie martwego/umierającego robota dotykiem - tylko gdy gracz
+		# wpada na niego wyraźnie Z BOKU. Gdy gracz STOI na robocie (także na jego
+		# rogu), normalna kolizji jest pionowa lub ukośna - wtedy nie pchamy.
+		# Bez tego warunku stanie na martwym robocie wpychałoby mu prędkość
+		# poziomą co klatkę i para gracz+robot sama by jechała.
 		if enemy.state == Enemy.State.DYING or enemy.state == Enemy.State.DEAD:
-			enemy.push(_dir_to(enemy), Enemy.PUSH_SPEED)
+			# Normalna wskazuje od robota ku graczowi, więc -znak(x) = "od gracza".
+			# Kierunek z normalnej (a nie z pozycji środków) jest zawsze zgodny
+			# ze stroną kontaktu, która właśnie przeszła powyższy warunek.
+			var normal: Vector2 = collision.get_normal()
+			if absf(normal.x) > SIDE_PUSH_MIN_NORMAL_X:
+				enemy.push(int(-signf(normal.x)), Enemy.PUSH_SPEED)
 
 
 func _spawn_sparks(collision_position: Vector2) -> void:
