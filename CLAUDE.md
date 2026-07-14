@@ -70,6 +70,45 @@ dzięki czemu martwe roboty zderzają się ze sobą. Żywe roboty się przenikaj
 `ui_left`/`ui_right` (strzałki + AD), `ui_up`/`ui_down` (WS, rozglądanie kamerą),
 `ui_accept` (skok, Spacja - akcja wbudowana), `shoot` (F).
 
+## Przepływ pracy z Claude Code
+
+Repo ma skonfigurowaną infrastrukturę Claude Code w katalogu `.claude/`.
+
+**Subagenci** (`.claude/agents/`) — deleguj im wyspecjalizowane zadania:
+- `godot-reviewer` — recenzja kodu GDScript pod konwencje projektu i API Godota.
+  Wywołuj po napisaniu/zmianie plików `.gd`.
+- `scene-inspector` — czyta i wyjaśnia sceny `.tscn`/`.tres` (drzewo węzłów,
+  sygnały, warstwy kolizji) bez edytora Godota.
+- `godot-docs` — wyszukuje dokumentację Godota 4.7 (pobiera źródła z
+  `raw.githubusercontent.com`, bo `docs.godotengine.org` blokuje pobieranie).
+
+**Komendy / skille** (`.claude/skills/`) — wywołuj przez `/`:
+- `/sprawdz` — rutyna weryfikacji bez testów: `gdformat`/`gdlint`, import w
+  Godocie headless (jeśli dostępny), w ostateczności czytanie scen. Uruchamiaj
+  po zmianach.
+- `/nowy-obiekt` — rusztowanie nowego obiektu gry (skrypt + scena) wg konwencji
+  (typowanie, nagłówek, warstwy kolizji, grupy, sygnały, rozgrzewka shaderów).
+
+**Hooki + uprawnienia** — skrypty leżą w `.claude/hooks/`, ale rejestruje je
+`.claude/settings.json`, którego nie ma w repo (poszerza uprawnienia agenta,
+więc aktywujesz go świadomie): `cp .claude/settings.json.example .claude/settings.json`.
+Po aktywacji działają:
+- `SessionStart` (`session-start.sh`) — na starcie sesji wypisuje wersję silnika,
+  gałąź, dostępność narzędzi i niezacommitowane pliki.
+- `PostToolUse` (`gd-check.sh`) — po edycji pliku `.gd` doradczo (nieblokująco)
+  uruchamia `gdformat --check`/`gdlint`, jeśli gdtoolkit jest zainstalowany.
+- `permissions.allow` — auto-zgoda na bezpieczne komendy read-only (mniej pytań).
+
+**Lint/format**: `gdtoolkit` (`pip install gdtoolkit`), konfiguracja w `.gdlintrc`.
+
+**CI** (`.github/workflows/godot-check.yml`): przy PR i push sprawdza format/lint
+(doradczo) oraz import projektu w Godocie headless (parsowanie skryptów). Wersję
+silnika ustawia `GODOT_VERSION` (obecnie `4.6`).
+
+> Godot 4.7 jest już dostępny (stabilny). Subagenci są go świadomi, ale sama
+> migracja silnika (bump `config/features` na `"4.7"`, teksty w README/CLAUDE,
+> `GODOT_VERSION` w CI) jest zaplanowana osobno — patrz plan w historii sesji.
+
 ## Praca z gitem
 
 Rozwój na gałęzi wskazanej w zadaniu. Commituj po polsku, zwięźle i opisowo.
