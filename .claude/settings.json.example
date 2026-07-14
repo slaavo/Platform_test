@@ -1,0 +1,46 @@
+{
+  "//": "Szablon ustawień Claude Code dla projektu. Aktywuj świadomie:",
+  "//activate": "cp .claude/settings.json.example .claude/settings.json",
+  "//why": "Nadaje agentowi zgody (allow) na bezpieczne komendy read-only oraz podpina hooki. Przejrzyj przed użyciem — to poszerza uprawnienia agenta.",
+  "permissions": {
+    "allow": [
+      "Bash(git status)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git branch:*)",
+      "Bash(gdformat:*)",
+      "Bash(gdlint:*)",
+      "Bash(python -m gdtoolkit:*)",
+      "Bash(pip install gdtoolkit:*)",
+      "Bash(godot --headless:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/session-start.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/gd-check.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

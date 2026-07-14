@@ -1,0 +1,5 @@
+# Konfiguracja gdlint (gdtoolkit) dla projektu.
+# Trzymamy się wartości bliskich domyślnym — spójnych z gdformat (linia 100).
+# max-file-lines podniesione, bo kilka skryptów gry jest dłuższych.
+max-line-length: 100
+max-file-lines: 1200

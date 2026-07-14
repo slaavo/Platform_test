@@ -1,0 +1,62 @@
+name: Godot check
+
+# Automatyczna weryfikacja przy PR i push. Dwa niezależne zadania:
+#   - lint:   format i lint GDScript (gdtoolkit). DORADCZE (continue-on-error),
+#             bo kod nie był wcześniej lintowany. Gdy raz przejdziesz `gdformat .`
+#             i posprzątasz uwagi, usuń `continue-on-error`, by lint blokował PR.
+#   - import: pobiera Godota headless i importuje projekt — wymusza parsowanie
+#             wszystkich skryptów. To realna bramka poprawności.
+
+on:
+  pull_request:
+  push:
+    branches: [main, "claude/**"]
+
+env:
+  # Wersja silnika użyta w CI. Zgodna z obecnym project.godot (features "4.6").
+  # Przy migracji do Godota 4.7 zmień tę wartość na "4.7".
+  GODOT_VERSION: "4.6"
+
+jobs:
+  lint:
+    name: Format i lint (gdtoolkit)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Instalacja gdtoolkit
+        run: pip install "gdtoolkit>=4,<5"
+      - name: gdformat --check
+        run: gdformat --check --diff .
+      - name: gdlint
+        run: gdlint .
+
+  import:
+    name: Import projektu (Godot headless)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pobierz Godota ${{ env.GODOT_VERSION }} (headless)
+        run: |
+          set -euo pipefail
+          base="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable"
+          zip="Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          wget -qO godot.zip "${base}/${zip}"
+          unzip -q godot.zip
+          mv "Godot_v${GODOT_VERSION}-stable_linux.x86_64" godot
+          chmod +x godot
+      - name: Import i parsowanie skryptów
+        run: |
+          set -uo pipefail
+          # Import zasobów wymusza parsowanie skryptów; log zapisujemy do pliku.
+          ./godot --headless --path . --import 2>&1 | tee import.log || true
+          ./godot --headless --path . --quit 2>&1 | tee -a import.log || true
+          # Fail wyłącznie przy realnych błędach skryptów, nie przy ostrzeżeniach.
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script" import.log; then
+            echo "::error::Wykryto błędy parsowania skryptów przy imporcie."
+            exit 1
+          fi
+          echo "Import OK — brak błędów skryptów."
