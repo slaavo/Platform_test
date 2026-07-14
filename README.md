@@ -1,6 +1,6 @@
 # Skok po Monety
 
-Prosta gra platformowa 2D tworzona w silniku Godot 4.6.
+Prosta gra platformowa 2D tworzona w silniku Godot 4.7.
 
 ## O projekcie
 
@@ -81,7 +81,7 @@ Gra platformowa, w której gracz steruje postacią skaczącą po platformach, zb
 
 ## Technologie
 
-- **Silnik:** Godot 4.6
+- **Silnik:** Godot 4.7
 - **Język:** GDScript
 - **Platformy docelowe:** Windows, Android
 
@@ -128,7 +128,7 @@ Projekt wykorzystuje:
 
 ## Uruchomienie
 
-1. Otwórz projekt w Godot 4.6
+1. Otwórz projekt w Godot 4.7
 2. Uruchom scenę `main.tscn` (F5)
 
 ## Sterowanie

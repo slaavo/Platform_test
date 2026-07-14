@@ -13,9 +13,9 @@ on:
     branches: [main, "claude/**"]
 
 env:
-  # Wersja silnika użyta w CI. Zgodna z obecnym project.godot (features "4.6").
-  # Przy migracji do Godota 4.7 zmień tę wartość na "4.7".
-  GODOT_VERSION: "4.6"
+  # Wersja silnika użyta w CI. Zgodna z project.godot (features "4.7").
+  # Tag wydania Godota to "<GODOT_VERSION>-stable" (dla .0 jest to "4.7-stable").
+  GODOT_VERSION: "4.7"
 
 jobs:
   lint:
