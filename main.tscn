@@ -22,6 +22,7 @@ script = ExtResource("1_r0du0")
 motion_scale = Vector2(0.3, 0.3)
 
 [node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/ParallaxLayer"]
+modulate = Color(1.2, 1.1, 0.9, 1)
 position = Vector2(1447.0001, 594.9999)
 scale = Vector2(1.8239583, 2.5240736)
 texture = ExtResource("2_trn2v")
