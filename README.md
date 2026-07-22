@@ -107,6 +107,7 @@ Gra platformowa, w której gracz steruje postacią skaczącą po platformach, zb
 ├── one_shot_particle.gd # Uniwersalny jednorazowy efekt (błysk, dym, wybuch)
 ├── spark_effect.gd      # Iskry przy kolizji z wrogiem
 ├── death_smoke.gd       # Ciągły dym martwego robota
+├── pixel_posterize.gdshader # Shader posteryzacji - spłaszcza gładkie sprite'y do ograniczonej palety
 └── assets/              # Grafiki, czcionki i zasoby
     ├── fonts/           # Czcionka tekstu (BebasNeue)
     └── bitmaps/
@@ -125,6 +126,7 @@ Projekt wykorzystuje:
 - **Autoload** - `GameState` jako singleton do przechowywania stanu między scenami
 - **Type hints** - statyczne typowanie dla bezpieczeństwa kodu
 - **@tool** - podgląd platform w edytorze
+- **Spójny styl grafiki** - globalny filtr `Nearest` (ostry pixel-art) dla gracza, wroga i platform; per-węzeł `Linear` dla mocno skalowanych sprite'ów HD (tło, moneta), by nie migotały; shader `pixel_posterize.gdshader` ujednolica głębię koloru
 
 ## Uruchomienie
 

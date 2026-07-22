@@ -64,6 +64,16 @@ dzięki czemu martwe roboty zderzają się ze sobą. Żywe roboty się przenikaj
 - **Rozgrzewka shaderów** w `main.gd` (`_warmup_shaders`) renderuje wszystkie
   typy cząsteczek przezroczyście przy starcie, by uniknąć przycięcia przy
   pierwszym efekcie. Dodając nowy efekt cząsteczkowy, dopisz go tam.
+- **Filtrowanie tekstur (spójność grafiki)** - globalny domyślny filtr to
+  `Nearest` (`rendering/textures/canvas_textures/default_texture_filter=0`)
+  dla ostrego pixel-artu (gracz, wróg, platformy). Wyjątki per-węzeł na
+  `Linear` (`texture_filter = 2` na węźle) dla sprite'ów HD mocno skalowanych,
+  które pod Nearest migoczą/kanciacieją: tło (powiększane) i moneta
+  (pomniejszana 5× + obrót). UWAGA na enum: na węźle `1`=Nearest, `2`=Linear
+  (odwrotnie niż w ustawieniu projektu, gdzie `0`=Nearest, `1`=Linear).
+  `pixel_posterize.gdshader` (material na sprite) ujednolica głębię koloru
+  gładkich, "HD" sprite'ów do ograniczonej palety - to nie cząsteczki, więc
+  NIE wymaga wpisu w `_warmup_shaders` (kompiluje się przy wczytaniu sceny).
 
 ## Akcje wejścia (project.godot)
 
