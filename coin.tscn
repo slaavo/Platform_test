@@ -269,7 +269,7 @@ size = Vector2(272.00006, 272.00006)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_coin"]
 shader = ExtResource("3_post")
-shader_parameter/levels = 6
+shader_parameter/levels = 3
 
 [node name="Coin" type="Node2D"]
 script = ExtResource("1_o4fra")
